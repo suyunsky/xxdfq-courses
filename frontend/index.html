@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小小达芬奇｜看见自己 · 从艺术开始</title>
+    
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- 艺术字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 样式 -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    
+    <!-- 网站图标 -->
+    <link rel="icon" type="image/svg+xml" href="assets/icons/palette.svg">
+    
+    <style>
+        /* 临时内联样式，确保立即生效 */
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #faf9f7; }
+        .art-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.03; }
+        .art-dot { position: absolute; border-radius: 50%; background: #8a6d3b; }
+    </style>
+</head>
+<body>
+    <!-- 艺术背景元素 -->
+    <div class="art-bg" id="artBackground"></div>
+    
+    <!-- Vue应用挂载点 -->
+    <div id="app"></div>
+    
+    <!-- 组件脚本 -->
+    <script src="js/components/NavBar.js" type="module"></script>
+    <script src="js/components/Footer.js" type="module"></script>
+    
+    <!-- 页面组件 -->
+    <script src="js/pages/HomePage.js" type="module"></script>
+    <script src="js/pages/CoursesPage.js" type="module"></script>
+    <script src="js/pages/CourseDetailPage.js" type="module"></script>
+    <script src="js/pages/DashboardPage.js" type="module"></script>
+    <script src="js/pages/LoginPage.js" type="module"></script>
+    
+    <!-- 工具和核心 -->
+    <script src="js/utils/artEffects.js" type="module"></script>
+    <script src="js/app.js" type="module"></script>
+    
+    <script>
+        // 创建艺术背景点
+        document.addEventListener('DOMContentLoaded', function() {
+            const bg = document.getElementById('artBackground');
+            for (let i = 0; i < 50; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'art-dot';
+                dot.style.width = dot.style.height = Math.random() * 4 + 1 + 'px';
+                dot.style.left = Math.random() * 100 + '%';
+                dot.style.top = Math.random() * 100 + '%';
+                dot.style.background = `hsl(${Math.random() * 30 + 30}, 30%, 50%)`;
+                dot.style.opacity = Math.random() * 0.3 + 0.1;
+                bg.appendChild(dot);
+            }
+        });
+    </script>
+</body>
+</html>

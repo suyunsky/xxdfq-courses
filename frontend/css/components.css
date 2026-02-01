@@ -1,0 +1,427 @@
+/* 组件样式 - 艺术教育平台 */
+
+/* 导航栏 */
+.art-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(250, 249, 247, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--color-primary-200);
+    z-index: 1000;
+    padding: var(--space-md) 0;
+}
+
+.art-navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.art-navbar-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.art-navbar-logo {
+    font-size: 1.5rem;
+    color: var(--color-accent-art);
+    margin-right: var(--space-sm);
+}
+
+.art-navbar-title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--color-secondary-800);
+}
+
+.art-navbar-menu {
+    display: flex;
+    list-style: none;
+    gap: var(--space-xl);
+}
+
+.art-navbar-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+    position: relative;
+}
+
+.art-navbar-link:hover {
+    color: var(--color-accent-art);
+}
+
+.art-navbar-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--color-accent-art);
+    transition: width var(--transition-normal);
+}
+
+.art-navbar-link:hover::after {
+    width: 100%;
+}
+
+.art-navbar-actions {
+    display: flex;
+    gap: var(--space-md);
+}
+
+/* 页脚 */
+.art-footer {
+    background: var(--color-primary-100);
+    border-top: 1px solid var(--color-primary-200);
+    padding: var(--space-2xl) 0;
+    margin-top: var(--space-3xl);
+}
+
+.art-footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+.art-footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-2xl);
+    margin-bottom: var(--space-2xl);
+}
+
+.art-footer-section-title {
+    font-size: 1.125rem;
+    margin-bottom: var(--space-lg);
+    color: var(--color-secondary-800);
+}
+
+.art-footer-links {
+    list-style: none;
+}
+
+.art-footer-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    margin-bottom: var(--space-sm);
+    display: block;
+    transition: color var(--transition-fast);
+}
+
+.art-footer-link:hover {
+    color: var(--color-accent-art);
+}
+
+.art-footer-bottom {
+    text-align: center;
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--color-primary-200);
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+/* Hero区域 */
+.art-hero {
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-3xl) var(--space-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.art-hero-content {
+    max-width: 800px;
+    z-index: 1;
+}
+
+.art-hero-title {
+    font-size: 4rem;
+    font-weight: 300;
+    margin-bottom: var(--space-lg);
+    line-height: 1.2;
+    background: linear-gradient(135deg, var(--color-secondary-800), var(--color-accent-art));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.art-hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-2xl);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.art-hero-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* 价值卡片 */
+.art-values {
+    padding: var(--space-3xl) var(--space-lg);
+    background: var(--color-primary-100);
+}
+
+.art-values-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.art-values-title {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+}
+
+.art-values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-2xl);
+}
+
+.art-value-card {
+    text-align: center;
+    padding: var(--space-2xl);
+}
+
+.art-value-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--space-lg);
+    background: var(--color-primary-50);
+    border-radius: var(--border-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--color-accent-art);
+    border: 2px solid var(--color-primary-200);
+}
+
+.art-value-title {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-md);
+}
+
+.art-value-description {
+    color: var(--color-text-secondary);
+}
+
+/* 艺术成长阶段 */
+.art-stages {
+    padding: var(--space-3xl) var(--space-lg);
+}
+
+.art-stages-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.art-stages-title {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+}
+
+.art-stages-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+    position: relative;
+}
+
+.art-stages-timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, 
+        transparent, 
+        var(--color-accent-art), 
+        transparent);
+    transform: translateX(-50%);
+}
+
+.art-stage-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xl);
+    position: relative;
+}
+
+.art-stage-item:nth-child(odd) {
+    flex-direction: row;
+}
+
+.art-stage-item:nth-child(even) {
+    flex-direction: row-reverse;
+}
+
+.art-stage-marker {
+    width: 40px;
+    height: 40px;
+    background: var(--color-primary-50);
+    border: 2px solid var(--color-accent-art);
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.art-stage-content {
+    flex: 1;
+    padding: var(--space-xl);
+    background: var(--color-primary-50);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-primary-200);
+}
+
+.art-stage-number {
+    font-size: 0.875rem;
+    color: var(--color-accent-art);
+    margin-bottom: var(--space-sm);
+    font-weight: 500;
+}
+
+.art-stage-name {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-md);
+}
+
+.art-stage-description {
+    color: var(--color-text-secondary);
+}
+
+/* 适合人群 */
+.art-audience {
+    padding: var(--space-3xl) var(--space-lg);
+    background: var(--color-primary-100);
+}
+
+.art-audience-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.art-audience-title {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+}
+
+.art-audience-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    justify-content: center;
+}
+
+.art-audience-tag {
+    padding: var(--space-md) var(--space-xl);
+    background: var(--color-primary-50);
+    border: 2px solid var(--color-primary-200);
+    border-radius: var(--border-radius-full);
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    transition: all var(--transition-normal);
+}
+
+.art-audience-tag:hover {
+    border-color: var(--color-accent-art);
+    color: var(--color-accent-art);
+    transform: translateY(-2px);
+}
+
+/* 艺术元素组件 */
+.art-element {
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.art-element-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 1px solid var(--color-accent-art);
+    opacity: 0.1;
+}
+
+.art-element-line {
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        var(--color-accent-art), 
+        transparent);
+    opacity: 0.2;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .art-navbar-menu {
+        display: none;
+    }
+    
+    .art-hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .art-hero-subtitle {
+        font-size: 1.25rem;
+    }
+    
+    .art-stages-timeline::before {
+        left: 30px;
+    }
+    
+    .art-stage-item {
+        flex-direction: row !important;
+        gap: var(--space-lg);
+    }
+    
+    .art-stage-marker {
+        left: 30px;
+    }
+    
+    .art-stage-content {
+        margin-left: 60px;
+    }
+    
+    .art-values-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .art-hero-title {
+        font-size: 2rem;
+    }
+    
+    .art-hero-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .art-audience-tags {
+        flex-direction: column;
+        align-items: center;
+    }
+}

@@ -1,0 +1,363 @@
+/* 小小达芬奇艺术教育平台 - 主样式 */
+/* 艺术、克制、温暖、简洁 */
+
+/* 基础重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--color-text-primary);
+    background-color: var(--color-primary-50);
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* 艺术背景纹理 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: var(--art-texture);
+    background-size: 200px 200px;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* 排版 */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: var(--space-md);
+    color: var(--color-secondary-800);
+}
+
+h1 {
+    font-size: 3.5rem;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+}
+
+h2 {
+    font-size: 2.5rem;
+    font-weight: 400;
+}
+
+h3 {
+    font-size: 1.75rem;
+    font-weight: 500;
+}
+
+p {
+    margin-bottom: var(--space-md);
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+}
+
+a {
+    color: var(--color-accent-art);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--color-accent-warm);
+    text-decoration: underline;
+}
+
+/* 艺术分隔线 */
+.art-divider {
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--color-accent-art) 50%, 
+        transparent 100%);
+    margin: var(--space-2xl) auto;
+    max-width: 200px;
+    opacity: 0.3;
+}
+
+/* 艺术边框 */
+.art-border {
+    border: 1px solid var(--color-primary-200);
+    border-radius: var(--border-radius-lg);
+    position: relative;
+}
+
+.art-border::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 1px solid var(--color-accent-art);
+    border-radius: calc(var(--border-radius-lg) + 2px);
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+/* 艺术阴影 */
+.art-shadow {
+    box-shadow: var(--shadow-art);
+    transition: box-shadow var(--transition-normal);
+}
+
+.art-shadow:hover {
+    box-shadow: 0 12px 32px rgba(138, 109, 59, 0.2);
+}
+
+/* 艺术渐变背景 */
+.art-gradient {
+    background: var(--art-gradient);
+    position: relative;
+    overflow: hidden;
+}
+
+.art-gradient::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        transparent 0%, 
+        rgba(138, 109, 59, 0.03) 50%, 
+        transparent 100%);
+    pointer-events: none;
+}
+
+/* 艺术动画 */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.art-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.art-fade-in {
+    animation: fadeIn 1s ease-out;
+}
+
+.art-pulse {
+    animation: pulse 3s ease-in-out infinite;
+}
+
+/* 艺术图标 */
+.art-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-100);
+    border-radius: var(--border-radius-full);
+    color: var(--color-accent-art);
+    font-size: 1.5rem;
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--color-primary-200);
+}
+
+/* 艺术按钮 */
+.art-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md) var(--space-xl);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: var(--border-radius-full);
+    border: 1px solid var(--color-primary-200);
+    background: var(--color-primary-100);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.art-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+    transition: left 0.5s;
+}
+
+.art-btn:hover::before {
+    left: 100%;
+}
+
+.art-btn:hover {
+    background: var(--color-primary-200);
+    border-color: var(--color-accent-art);
+    color: var(--color-accent-art);
+    transform: translateY(-2px);
+}
+
+.art-btn-primary {
+    background: var(--color-secondary-800);
+    border-color: var(--color-secondary-800);
+    color: var(--color-text-light);
+}
+
+.art-btn-primary:hover {
+    background: var(--color-secondary-900);
+    border-color: var(--color-secondary-900);
+    color: var(--color-text-light);
+}
+
+.art-btn-outline {
+    background: transparent;
+    border: 2px solid var(--color-accent-art);
+    color: var(--color-accent-art);
+}
+
+.art-btn-outline:hover {
+    background: var(--color-accent-art);
+    color: var(--color-primary-50);
+}
+
+/* 艺术卡片 */
+.art-card {
+    background: var(--color-primary-50);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-primary-200);
+    padding: var(--space-xl);
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.art-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-accent-art);
+    box-shadow: var(--shadow-art);
+}
+
+.art-card-header {
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-primary-200);
+}
+
+.art-card-title {
+    font-size: 1.5rem;
+    color: var(--color-secondary-800);
+    margin-bottom: var(--space-sm);
+}
+
+/* 艺术标签 */
+.art-tag {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-md);
+    background: var(--color-primary-100);
+    border: 1px solid var(--color-primary-200);
+    border-radius: var(--border-radius-full);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-right: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.art-tag-art {
+    background: rgba(138, 109, 59, 0.1);
+    border-color: var(--color-accent-art);
+    color: var(--color-accent-art);
+}
+
+/* 艺术列表 */
+.art-list {
+    list-style: none;
+}
+
+.art-list-item {
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--color-primary-200);
+    display: flex;
+    align-items: center;
+}
+
+.art-list-item:last-child {
+    border-bottom: none;
+}
+
+.art-list-icon {
+    margin-right: var(--space-md);
+    color: var(--color-accent-art);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+    
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    h2 {
+        font-size: 2rem;
+    }
+    
+    .art-card {
+        padding: var(--space-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.75rem;
+    }
+}
+
+/* 打印样式 */
+@media print {
+    .art-btn,
+    .art-shadow {
+        box-shadow: none;
+    }
+    
+    .art-card {
+        border: 1px solid #ddd;
+    }
+}
