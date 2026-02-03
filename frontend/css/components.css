@@ -425,3 +425,200 @@
         align-items: center;
     }
 }
+
+/* ============================================
+   腾讯云点播播放器样式
+   ============================================ */
+
+/* 播放器容器 */
+.tencent-vod-player {
+    position: relative;
+    width: 100%;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 300px;
+}
+
+.vod-player-container {
+    width: 100%;
+    height: 100%;
+}
+
+/* 权限提示样式 */
+.vod-access-denied {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.access-denied-content {
+    text-align: center;
+    color: white;
+    padding: 30px;
+    max-width: 400px;
+}
+
+.access-denied-content i {
+    font-size: 3rem;
+    color: #ff9800;
+    margin-bottom: 20px;
+}
+
+.access-denied-content h4 {
+    margin: 0 0 10px 0;
+    font-size: 1.5rem;
+}
+
+.access-denied-content p {
+    margin: 0 0 20px 0;
+    opacity: 0.8;
+    line-height: 1.5;
+}
+
+/* 加载状态 */
+.vod-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.vod-loading .art-loader {
+    margin-bottom: 15px;
+}
+
+.vod-loading p {
+    color: white;
+    margin: 0;
+}
+
+/* 错误状态 */
+.vod-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    padding: 20px;
+}
+
+.vod-error i {
+    font-size: 3rem;
+    color: #dc3545;
+    margin-bottom: 15px;
+}
+
+.vod-error h4 {
+    color: white;
+    margin: 0 0 10px 0;
+    font-size: 1.3rem;
+}
+
+.vod-error p {
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 20px 0;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* 视频信息 */
+.vod-video-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+    padding: 10px 15px;
+    z-index: 2;
+}
+
+.video-meta {
+    display: flex;
+    gap: 15px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+}
+
+.video-meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 适配TCPlayer主题 */
+.tcplayer {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tcplayer video {
+    border-radius: 8px;
+}
+
+/* 自定义控制栏样式 */
+.vjs-control-bar {
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)) !important;
+}
+
+.vjs-button:hover {
+    color: var(--color-accent-art) !important;
+}
+
+.vjs-play-progress {
+    background-color: var(--color-accent-art) !important;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .tencent-vod-player {
+        min-height: 250px;
+    }
+    
+    .vod-video-info {
+        padding: 8px 10px;
+    }
+    
+    .video-meta {
+        font-size: 0.75rem;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tencent-vod-player {
+        min-height: 200px;
+    }
+    
+    .access-denied-content {
+        padding: 20px;
+    }
+    
+    .access-denied-content i {
+        font-size: 2.5rem;
+    }
+    
+    .access-denied-content h4 {
+        font-size: 1.2rem;
+    }
+}

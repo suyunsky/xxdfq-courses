@@ -8,3 +8,5 @@ sqlalchemy==2.0.23
 alembic==1.12.1
 pymysql==1.1.0  # 使用纯Python的MySQL驱动
 python-dotenv==1.0.0
+tencentcloud-sdk-python==3.0.1130  # 腾讯云SDK
+cryptography==42.0.5  # 加密库用于签名生成

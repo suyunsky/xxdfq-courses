@@ -130,6 +130,72 @@ class LearningRecord(Base):
     duration = Column(Integer)  # 学习时长（秒）
     created_at = Column(DateTime, default=datetime.utcnow)
 
+# 腾讯云点播视频模型
+class VodVideo(Base):
+    __tablename__ = 'vod_videos'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    file_id = Column(String(100), unique=True, nullable=False)  # 腾讯云FileID
+    title = Column(String(200), nullable=False)
+    description = Column(Text)
+    course_id = Column(Integer, ForeignKey('courses.id'))
+    lesson_id = Column(Integer, ForeignKey('lessons.id'))
+    duration = Column(Integer)  # 视频时长（秒）
+    size = Column(Integer)  # 文件大小（字节）
+    resolution = Column(String(50))  # 分辨率，如"1920x1080"
+    format = Column(String(20))  # 视频格式，如"mp4", "m3u8"
+    cover_url = Column(String(500))  # 封面图URL
+    play_url = Column(String(500))  # 播放URL
+    status = Column(String(20), default='processing')  # processing, ready, error
+    transcode_task_id = Column(String(100))  # 转码任务ID
+    watermark_id = Column(String(100))  # 水印模板ID
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # 关系
+    course = relationship("Course")
+    lesson = relationship("Lesson")
+
+# 视频播放记录模型
+class VideoPlayRecord(Base):
+    __tablename__ = 'video_play_records'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    video_id = Column(Integer, ForeignKey('vod_videos.id'), nullable=False)
+    course_id = Column(Integer, ForeignKey('courses.id'))
+    lesson_id = Column(Integer, ForeignKey('lessons.id'))
+    play_duration = Column(Integer, default=0)  # 播放时长（秒）
+    total_duration = Column(Integer)  # 视频总时长（秒）
+    progress = Column(Integer, default=0)  # 播放进度百分比 0-100
+    completed = Column(Boolean, default=False)  # 是否观看完成
+    device_type = Column(String(50))  # 设备类型：web, ios, android
+    ip_address = Column(String(50))
+    user_agent = Column(String(500))
+    started_at = Column(DateTime, default=datetime.utcnow)
+    ended_at = Column(DateTime)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # 关系
+    user = relationship("User")
+    video = relationship("VodVideo")
+    course = relationship("Course")
+    lesson = relationship("Lesson")
+
+# 视频播放签名缓存模型
+class PlaySignature(Base):
+    __tablename__ = 'play_signatures'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    file_id = Column(String(100), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    psign = Column(Text, nullable=False)  # 播放签名
+    expires_at = Column(DateTime, nullable=False)  # 签名过期时间
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # 关系
+    user = relationship("User")
+
 # 创建数据库引擎
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./xxdfq.db")
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {})

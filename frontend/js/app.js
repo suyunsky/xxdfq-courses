@@ -184,6 +184,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.LoginPage) {
             app.component('LoginPage', window.LoginPage);
         }
+        if (window.TencentVodPlayer) {
+            app.component('TencentVodPlayer', window.TencentVodPlayer);
+        }
+        if (window.CourseDetailPage) {
+            app.component('CourseDetailPage', window.CourseDetailPage);
+        }
         
         app.mount('#app');
         console.log('小小达芬奇艺术教育平台已启动');

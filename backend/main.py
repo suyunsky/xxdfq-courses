@@ -19,6 +19,7 @@ from auth import (
     get_password_hash, check_video_access, generate_video_token,
     security
 )
+from vod_api import router as vod_router
 
 # 创建FastAPI应用
 app = FastAPI(
@@ -137,6 +138,9 @@ def startup_event():
     """应用启动时创建数据库表"""
     create_tables()
     print("数据库表已创建")
+
+# 注册腾讯云点播API路由
+app.include_router(vod_router)
 
 # API路由
 @app.get("/")

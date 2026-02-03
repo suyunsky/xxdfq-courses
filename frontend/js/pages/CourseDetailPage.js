@@ -93,30 +93,21 @@ window.CourseDetailPage = {
                                 </span>
                             </div>
                             
-                            <div style="padding: 20px;">
-                                <div v-if="!hasVideoAccess" style="text-align: center; padding: 30px 15px;">
-                                    <i class="fas fa-lock" style="font-size: 2.5rem; color: #ff9800; margin-bottom: 15px;"></i>
-                                    <h4 style="margin: 0 0 10px 0; color: #333;">需要解锁</h4>
-                                    <p style="color: #666; margin-bottom: 20px;">{{ accessMessage }}</p>
-                                    <button class="art-btn art-btn-primary" @click="navigateTo('/login')">
-                                        <i class="fas fa-sign-in-alt"></i> 登录观看
-                                    </button>
-                                </div>
-                                <div v-else>
-                                    <div style="background: #f5f5f5; border-radius: 6px; padding: 40px 20px; text-align: center; margin-bottom: 15px;">
-                                        <i class="fas fa-play-circle" style="font-size: 3rem; color: #1976d2; margin-bottom: 10px;"></i>
-                                        <p style="color: #666; margin: 0 0 5px 0;">视频播放器</p>
-                                        <p style="color: #999; font-size: 0.8rem; margin: 0;">{{ selectedLesson.video_url || '示例视频URL' }}</p>
-                                    </div>
-                                    <div style="display: flex; gap: 8px; justify-content: center;">
-                                        <button class="art-btn art-btn-outline" style="padding: 6px 12px;">
-                                            <i class="fas fa-play"></i> 播放
-                                        </button>
-                                        <button class="art-btn art-btn-outline" style="padding: 6px 12px;">
-                                            <i class="fas fa-expand"></i> 全屏
-                                        </button>
-                                    </div>
-                                </div>
+                            <div style="padding: 0;">
+                                <!-- 腾讯云点播播放器 -->
+                                <tencent-vod-player
+                                    :file-id="getTencentFileId(selectedLesson)"
+                                    :app-id="tencentAppId"
+                                    :psign="getVideoPsign(selectedLesson)"
+                                    :has-access="hasVideoAccess"
+                                    :access-message="accessMessage"
+                                    :autoplay="false"
+                                    @request-access="handleRequestAccess"
+                                    @play="onVideoPlay"
+                                    @pause="onVideoPause"
+                                    @ended="onVideoEnded"
+                                    @timeupdate="onVideoTimeUpdate"
+                                ></tencent-vod-player>
                             </div>
                             
                             <div style="padding: 15px; border-top: 1px solid #eee;">
@@ -144,7 +135,10 @@ window.CourseDetailPage = {
             isLoading: true,
             error: null,
             hasVideoAccess: false,
-            accessMessage: ''
+            accessMessage: '',
+            // 腾讯云点播配置
+            tencentAppId: '1309648761', // 示例AppID，实际使用时从后端获取
+            videoPsignCache: {} // 缓存播放签名
         };
     },
     computed: {
@@ -230,6 +224,76 @@ window.CourseDetailPage = {
                 this.hasVideoAccess = false;
                 this.accessMessage = '内部课程，请联系管理员获取访问权限';
             }
+        },
+        
+        // 获取腾讯云FileId（示例实现）
+        getTencentFileId(lesson) {
+            // 这里应该从lesson数据中获取腾讯云FileId
+            // 示例：根据lesson.id生成模拟FileId
+            if (lesson.id === 1) {
+                return '5285890784249077287'; // 示例FileId
+            } else if (lesson.id === 2) {
+                return '5285890784249077288'; // 示例FileId
+            }
+            return '5285890784249077289'; // 默认示例FileId
+        },
+        
+        // 获取视频播放签名（示例实现）
+        getVideoPsign(lesson) {
+            const lessonId = lesson.id;
+            
+            // 检查缓存
+            if (this.videoPsignCache[lessonId]) {
+                return this.videoPsignCache[lessonId];
+            }
+            
+            // 这里应该调用后端API获取真实的psign
+            // 示例：生成模拟psign
+            const mockPsign = this.generateMockPsign(lessonId);
+            this.videoPsignCache[lessonId] = mockPsign;
+            
+            return mockPsign;
+        },
+        
+        // 生成模拟psign（实际项目中应该从后端获取）
+        generateMockPsign(lessonId) {
+            // 模拟psign格式
+            const timestamp = Math.floor(Date.now() / 1000);
+            const expireTime = timestamp + 7200; // 2小时后过期
+            
+            // 注意：实际项目中psign应该从后端API获取
+            // 这里只是示例格式
+            return `eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhcHBJZCI6IjEzMDk2NDg3NjEiLCJmaWxlSWQiOiI1Mjg1ODkwNzg0MjQ5MDc3Mjg3IiwidXNlcklkIjoiMTIzNDU2IiwidHlwZSI6InBsYXkiLCJleHAiOjE3MDAwMDAwMDAsInRpbWVzdGFtcCI6MTcwMDAwMDAwMH0.mock_signature_for_lesson_${lessonId}`;
+        },
+        
+        // 处理请求访问权限
+        handleRequestAccess() {
+            if (this.course.access_level === 'premium') {
+                this.navigateTo('/login');
+            } else {
+                // 其他情况跳转到相应页面
+                this.navigateTo('/courses');
+            }
+        },
+        
+        // 视频播放事件
+        onVideoPlay() {
+            console.log('视频开始播放');
+            // 可以在这里记录播放开始时间等
+        },
+        
+        onVideoPause() {
+            console.log('视频暂停');
+        },
+        
+        onVideoEnded() {
+            console.log('视频播放结束');
+            // 可以在这里记录播放完成等
+        },
+        
+        onVideoTimeUpdate(data) {
+            // 可以在这里记录播放进度
+            // console.log('播放进度:', data.percentage);
         },
         
         selectLesson(lesson) {
