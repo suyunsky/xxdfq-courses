@@ -1,4 +1,10 @@
 // Vue应用入口文件 - 简化版本
+
+// 全局API配置 - 统一的后端API基础URL
+window.apiBaseUrl = 'http://localhost:8000'; // 后端运行在8000端口
+
+console.log('API基础URL配置:', window.apiBaseUrl);
+
 document.addEventListener('DOMContentLoaded', function() {
     // 等待Vue加载
     if (typeof Vue === 'undefined') {

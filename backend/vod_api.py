@@ -10,7 +10,7 @@ from typing import Optional, Dict, Any, List
 import json
 
 from models import get_db, User, VodVideo, Course, Lesson
-from auth import get_current_user, verify_video_token
+from auth import get_current_user, get_current_user_optional, verify_video_token
 from vod_service import VodManager, validate_file_id, format_duration
 
 router = APIRouter(prefix="/api/vod", tags=["腾讯云点播"])
@@ -56,31 +56,36 @@ async def get_playback_signature(
 @router.get("/video/{video_id}")
 async def get_video_info(
     video_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
     """
     获取视频信息及播放签名
     
     返回视频详细信息和播放所需的全部参数
+    免费课程支持匿名访问，付费课程需要登录
     """
     try:
         vod_manager = VodManager(db)
         
-        # 检查播放权限
-        if not vod_manager.check_playback_permission(current_user.id, video_id):
+        # 获取用户ID（可能为None）
+        user_id = current_user.id if current_user else None
+        
+        # 检查播放权限（支持匿名用户）
+        if not vod_manager.check_playback_permission(user_id, video_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="您没有权限观看此视频"
             )
         
         # 获取视频信息和播放签名
-        video_info = vod_manager.get_video_with_signature(video_id, current_user.id)
+        video_info = vod_manager.get_video_with_signature(video_id, user_id)
         
         return {
             "success": True,
             "data": video_info,
-            "message": "视频信息获取成功"
+            "message": "视频信息获取成功",
+            "is_anonymous": user_id is None
         }
         
     except HTTPException:

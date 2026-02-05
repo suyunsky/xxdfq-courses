@@ -137,13 +137,42 @@ window.TencentVodPlayer = {
         finalPlayerOptions() {
             if (!this.playbackParams) return this.playerOptions;
             
-            return {
-                ...this.playerOptions,
+            // TCPlayer配置参数（根据官方文档）
+            const tcplayerConfig = {
+                // 核心参数
                 fileID: this.playbackParams.file_id,
                 appID: this.playbackParams.app_id,
                 psign: this.playbackParams.psign,
+                
+                // 显示参数
                 poster: this.videoInfo?.cover_url || this.poster,
-                autoplay: this.autoplay && this.hasAccess
+                autoplay: this.autoplay && this.hasAccess,
+                
+                // 播放控制
+                controls: true,
+                preload: 'auto',
+                playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+                fluid: true,
+                
+                // 错误处理
+                notSupportedMessage: '请升级浏览器以支持视频播放',
+                
+                // 控制栏配置
+                controlBar: {
+                    remainingTimeDisplay: true,
+                    playToggle: true,
+                    progressControl: true,
+                    fullscreenToggle: true,
+                    volumePanel: true,
+                    playbackRateMenuButton: true,
+                    qualitySelector: true
+                }
+            };
+            
+            // 合并用户自定义配置
+            return {
+                ...tcplayerConfig,
+                ...this.playerOptions
             };
         },
         

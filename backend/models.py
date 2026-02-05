@@ -196,6 +196,39 @@ class PlaySignature(Base):
     # 关系
     user = relationship("User")
 
+# Web会话模型（HttpOnly Cookie + Server-Side Session）
+class Session(Base):
+    __tablename__ = 'sessions'
+    
+    id = Column(String(36), primary_key=True)  # Session ID (UUID)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    session_data = Column(Text, nullable=False)  # 加密的会话数据（JSON）
+    user_agent = Column(Text)
+    ip_address = Column(String(45))
+    device_info = Column(String(255))
+    last_activity_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # 关系
+    user = relationship("User", backref="sessions")
+
+# 会话事件审计模型
+class SessionEvent(Base):
+    __tablename__ = 'session_events'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(36), ForeignKey('sessions.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    event_type = Column(String(50), nullable=False)  # login, logout, expired, invalidated
+    ip_address = Column(String(45))
+    user_agent = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # 关系
+    session = relationship("Session")
+    user = relationship("User")
+
 # 创建数据库引擎
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./xxdfq.db")
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {})

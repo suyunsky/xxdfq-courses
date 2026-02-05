@@ -50,6 +50,19 @@ window.LoginPage = {
                                 >
                             </div>
                             
+                            <div style="margin-bottom: var(--space-xl);">
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input 
+                                        type="checkbox" 
+                                        v-model="loginForm.rememberMe"
+                                        style="margin-right: var(--space-sm);"
+                                    >
+                                    <span style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                                        记住我（30天内自动登录）
+                                    </span>
+                                </label>
+                            </div>
+                            
                             <div v-if="loginError" style="margin-bottom: var(--space-xl); padding: var(--space-md); background: var(--color-error-light); border-radius: var(--border-radius-md); color: var(--color-error);">
                                 {{ loginError }}
                             </div>
@@ -74,6 +87,10 @@ window.LoginPage = {
                                 <a href="/register" style="color: var(--color-accent-art); text-decoration: none; font-weight: 500;" @click.prevent="goToRegister">
                                     立即注册
                                 </a>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: var(--space-md); font-size: 0.875rem; color: var(--color-text-secondary);">
+                                <small>使用HttpOnly Cookie + Server-Side Session技术，更安全</small>
                             </div>
                         </form>
                     </div>
@@ -162,7 +179,8 @@ window.LoginPage = {
         return {
             loginForm: {
                 username: '',
-                password: ''
+                password: '',
+                rememberMe: false
             },
             isLoggingIn: false,
             loginError: '',
@@ -177,21 +195,49 @@ window.LoginPage = {
             this.loginError = '';
             
             try {
-                // 模拟API调用
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // 简单的验证
+                // 验证输入
                 if (!this.loginForm.username || !this.loginForm.password) {
                     throw new Error('请输入用户名和密码');
                 }
                 
-                // 模拟登录成功
-                console.log('登录成功:', this.loginForm.username);
+                // 调用Web会话登录API - 使用全局apiBaseUrl
+                const apiBaseUrl = window.apiBaseUrl || '';
+                const response = await fetch(apiBaseUrl + '/api/auth/web/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: this.loginForm.username,
+                        password: this.loginForm.password,
+                        remember_me: this.loginForm.rememberMe
+                    }),
+                    credentials: 'include' // 重要：包含Cookie
+                });
                 
-                // 跳转到用户中心
-                this.$emit('navigate', '/dashboard');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `登录失败 (${response.status})`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('Web会话登录成功:', result.user.username);
+                    
+                    // 存储用户信息到全局状态（如果需要）
+                    if (window.app && window.app.config && window.app.config.globalProperties) {
+                        window.app.config.globalProperties.$user = result.user;
+                    }
+                    
+                    // 跳转到用户中心
+                    this.$emit('navigate', '/dashboard');
+                } else {
+                    throw new Error(result.message || '登录失败');
+                }
                 
             } catch (error) {
+                console.error('登录错误:', error);
                 this.loginError = error.message || '登录失败，请检查用户名和密码';
             } finally {
                 this.isLoggingIn = false;

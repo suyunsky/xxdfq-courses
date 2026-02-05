@@ -43,33 +43,68 @@ class TencentVodService:
         
     def generate_psign(self, file_id: str, user_id: Optional[int] = None) -> Dict[str, Any]:
         """
-        生成播放签名(psign)
+        生成播放签名(psign) - 根据腾讯云官方文档（JWT格式）
+        
+        文档: https://cloud.tencent.com/document/product/266/45554
+        重要：Psign必须是JWT格式，使用HMAC-SHA256算法
+        
+        JWT格式: Header.Payload.Signature
+        Header: {"alg": "HS256", "typ": "JWT"}
+        Payload: {
+            "appId": 1300161743,
+            "fileId": "5145403715595978658",
+            "contentInfo": {"audioVideoType": "RawAdaptive"},
+            "currentTimeStamp": 当前时间戳,
+            "expireTimeStamp": 过期时间戳
+        }
         
         Args:
             file_id: 腾讯云视频FileID
-            user_id: 用户ID（可选，用于绑定用户）
+            user_id: 用户ID（可选，仅用于记录，不包含在JWT中）
             
         Returns:
             包含psign和相关信息的字典
         """
         try:
-            # 计算过期时间
+            import jwt
+            
+            # 检查播放密钥是否配置
+            play_key = os.getenv('TENCENT_VOD_PLAY_KEY')
+            if not play_key:
+                raise ValueError("播放密钥未配置，请设置TENCENT_VOD_PLAY_KEY环境变量")
+            
+            # 计算时间戳
             current_time = int(time.time())
             expire_time = current_time + self.signature_expire_seconds
             
-            # 生成签名
-            sign_str = f"{self.secret_key}{file_id}{expire_time}"
-            if user_id:
-                sign_str += str(user_id)
+            # 构建JWT Header
+            header = {
+                "alg": "HS256",
+                "typ": "JWT"
+            }
             
-            sign_md5 = hashlib.md5(sign_str.encode()).hexdigest()
+            # 构建JWT Payload - 根据腾讯云文档
+            payload = {
+                "appId": int(self.app_id),  # 必须是数字
+                "fileId": file_id,
+                "contentInfo": {
+                    "audioVideoType": "Original"  # 根据文档要求
+                },
+                "currentTimeStamp": current_time,
+                "expireTimeStamp": expire_time
+            }
             
-            # 构建psign
-            psign_content = f"{sign_md5};{expire_time}"
-            if user_id:
-                psign_content += f";{user_id}"
+            # 生成JWT
+            psign = jwt.encode(
+                payload,
+                play_key,
+                algorithm="HS256",
+                headers=header
+            )
             
-            psign = base64.b64encode(psign_content.encode()).decode()
+            # 如果是bytes类型，转换为字符串
+            if isinstance(psign, bytes):
+                psign = psign.decode('utf-8')
             
             return {
                 "psign": psign,
@@ -77,9 +112,13 @@ class TencentVodService:
                 "app_id": self.app_id,
                 "expire_time": expire_time,
                 "expire_at": datetime.fromtimestamp(expire_time).isoformat(),
-                "user_id": user_id
+                "user_id": user_id,
+                "payload": json.dumps(payload),  # 调试用
+                "jwt_format": True  # 标记为JWT格式
             }
             
+        except ImportError:
+            raise Exception("请安装pyjwt库: pip install pyjwt")
         except Exception as e:
             raise Exception(f"生成播放签名失败: {str(e)}")
     
@@ -104,31 +143,32 @@ class TencentVodService:
             
             media_info = resp.MediaInfoSet[0]
             
-            # 提取基本信息
+            # 提取基本信息 - 修复属性访问错误
             video_info = {
                 "file_id": file_id,
-                "name": media_info.BasicInfo.Name,
-                "description": media_info.BasicInfo.Description,
-                "size": media_info.MediaInfo.Size,
-                "duration": media_info.MediaInfo.Duration,
-                "type": media_info.MediaInfo.Type,
-                "status": media_info.MediaInfo.Status,
-                "cover_url": media_info.MediaInfo.CoverUrl,
-                "create_time": media_info.MediaInfo.CreateTime,
-                "update_time": media_info.MediaInfo.UpdateTime,
+                "name": media_info.BasicInfo.Name if hasattr(media_info, 'BasicInfo') else "",
+                "description": media_info.BasicInfo.Description if hasattr(media_info, 'BasicInfo') else "",
+                "size": media_info.MediaInfo.Size if hasattr(media_info, 'MediaInfo') else 0,
+                "duration": media_info.MediaInfo.Duration if hasattr(media_info, 'MediaInfo') else 0,
+                "type": media_info.MediaInfo.Type if hasattr(media_info, 'MediaInfo') else "",
+                "status": media_info.MediaInfo.Status if hasattr(media_info, 'MediaInfo') else "",
+                "cover_url": media_info.MediaInfo.CoverUrl if hasattr(media_info, 'MediaInfo') else "",
+                "create_time": media_info.MediaInfo.CreateTime if hasattr(media_info, 'MediaInfo') else "",
+                "update_time": media_info.MediaInfo.UpdateTime if hasattr(media_info, 'MediaInfo') else "",
             }
             
             # 提取转码信息
-            if hasattr(media_info.MediaInfo, 'TranscodeInfo'):
+            if hasattr(media_info, 'MediaInfo') and hasattr(media_info.MediaInfo, 'TranscodeInfo'):
                 transcode_info = media_info.MediaInfo.TranscodeInfo
-                video_info["transcode_status"] = transcode_info.Status
+                video_info["transcode_status"] = transcode_info.Status if hasattr(transcode_info, 'Status') else ""
                 
                 # 获取播放URL
                 if hasattr(transcode_info, 'TranscodeSet') and transcode_info.TranscodeSet:
                     for transcode in transcode_info.TranscodeSet:
-                        if transcode.Url:
+                        if hasattr(transcode, 'Url') and transcode.Url:
                             video_info["play_url"] = transcode.Url
-                            video_info["resolution"] = f"{transcode.Height}p"
+                            if hasattr(transcode, 'Height'):
+                                video_info["resolution"] = f"{transcode.Height}p"
                             break
             
             return video_info
@@ -454,12 +494,12 @@ class VodManager:
         except Exception as e:
             raise Exception(f"获取视频信息失败: {str(e)}")
     
-    def check_playback_permission(self, user_id: int, video_id: int) -> bool:
+    def check_playback_permission(self, user_id: Optional[int], video_id: int) -> bool:
         """
-        检查用户播放权限
+        检查用户播放权限（支持匿名用户）
         
         Args:
-            user_id: 用户ID
+            user_id: 用户ID（可为None表示匿名用户）
             video_id: 视频ID
             
         Returns:
@@ -471,14 +511,9 @@ class VodManager:
             if not video:
                 return False
             
-            # 获取用户
-            user = self.db.query(User).filter(User.id == user_id).first()
-            if not user or not user.is_active:
+            # 检查视频状态
+            if video.status != "ready":
                 return False
-            
-            # 管理员有所有权限
-            if user.role == "admin":
-                return True
             
             # 检查课程关联
             if video.course_id:
@@ -490,15 +525,28 @@ class VodManager:
                 if course.status != "published":
                     return False
                 
-                # 检查课程访问级别
+                # 免费课程允许匿名访问
                 if course.access_level == "free":
                     return True
                 
+                # 付费课程需要登录
+                if not user_id:
+                    return False
+                
+                # 获取用户信息
+                user = self.db.query(User).filter(User.id == user_id).first()
+                if not user or not user.is_active:
+                    return False
+                
+                # 管理员有所有权限
+                if user.role == "admin":
+                    return True
+                
+                # 付费课程权限检查
                 if course.access_level == "premium":
                     # 检查用户是否购买或报名
                     from models import UserCourse, Enrollment
                     
-                    # 检查用户课程关系
                     user_course = self.db.query(UserCourse).filter(
                         UserCourse.user_id == user_id,
                         UserCourse.course_id == video.course_id
@@ -507,7 +555,6 @@ class VodManager:
                     if user_course:
                         return True
                     
-                    # 检查报名记录
                     enrollment = self.db.query(Enrollment).filter(
                         Enrollment.user_id == user_id,
                         Enrollment.course_id == video.course_id,
@@ -516,8 +563,8 @@ class VodManager:
                     
                     return enrollment is not None
                 
+                # 内部课程需要特定权限
                 if course.access_level == "internal":
-                    # 内部课程需要特定权限
                     return user.role in ["teacher", "admin"]
             
             # 没有课程关联的视频，默认允许访问

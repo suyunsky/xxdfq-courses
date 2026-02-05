@@ -94,11 +94,11 @@ window.CourseDetailPage = {
                             </div>
                             
                             <div style="padding: 0;">
-                                <!-- 腾讯云点播播放器 -->
+                                <!-- 腾讯云点播播放器（新版） -->
                                 <tencent-vod-player
-                                    :file-id="getTencentFileId(selectedLesson)"
-                                    :app-id="tencentAppId"
-                                    :psign="getVideoPsign(selectedLesson)"
+                                    v-if="selectedLesson && hasVideoAccess"
+                                    :video-id="getVideoIdForLesson(selectedLesson)"
+                                    :auth-token="userAuthToken"
                                     :has-access="hasVideoAccess"
                                     :access-message="accessMessage"
                                     :autoplay="false"
@@ -106,8 +106,23 @@ window.CourseDetailPage = {
                                     @play="onVideoPlay"
                                     @pause="onVideoPause"
                                     @ended="onVideoEnded"
-                                    @timeupdate="onVideoTimeUpdate"
+                                    @error="onVideoError"
                                 ></tencent-vod-player>
+                                
+                                <div v-else-if="selectedLesson && !hasVideoAccess" style="padding: 40px 20px; text-align: center; background: #f8f9fa;">
+                                    <i class="fas fa-lock" style="font-size: 2rem; color: #6c757d; margin-bottom: 15px;"></i>
+                                    <h4 style="margin: 0 0 8px 0; color: #495057;">需要解锁</h4>
+                                    <p style="color: #6c757d; margin: 0 0 15px 0; font-size: 0.9rem;">{{ accessMessage }}</p>
+                                    <button class="art-btn art-btn-primary" @click="handleRequestAccess">
+                                        获取访问权限
+                                    </button>
+                                </div>
+                                
+                                <div v-else style="padding: 40px 20px; text-align: center; background: #f8f9fa;">
+                                    <i class="fas fa-video-slash" style="font-size: 2rem; color: #6c757d; margin-bottom: 15px;"></i>
+                                    <h4 style="margin: 0 0 8px 0; color: #495057;">视频加载中...</h4>
+                                    <p style="color: #6c757d; margin: 0; font-size: 0.9rem;">正在获取视频信息</p>
+                                </div>
                             </div>
                             
                             <div style="padding: 15px; border-top: 1px solid #eee;">
@@ -136,6 +151,7 @@ window.CourseDetailPage = {
             error: null,
             hasVideoAccess: false,
             accessMessage: '',
+            userAuthToken: '', // 用户认证令牌
             // 腾讯云点播配置
             tencentAppId: '1309648761', // 示例AppID，实际使用时从后端获取
             videoPsignCache: {} // 缓存播放签名
@@ -266,6 +282,17 @@ window.CourseDetailPage = {
             return `eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhcHBJZCI6IjEzMDk2NDg3NjEiLCJmaWxlSWQiOiI1Mjg1ODkwNzg0MjQ5MDc3Mjg3IiwidXNlcklkIjoiMTIzNDU2IiwidHlwZSI6InBsYXkiLCJleHAiOjE3MDAwMDAwMDAsInRpbWVzdGFtcCI6MTcwMDAwMDAwMH0.mock_signature_for_lesson_${lessonId}`;
         },
         
+        // 获取课时对应的视频ID
+        getVideoIdForLesson(lesson) {
+            // 这里应该从lesson数据中获取视频ID
+            // 对于测试课时ID=21，对应的视频ID=1
+            if (lesson.id === 21) {
+                return 1; // 测试视频ID
+            }
+            // 其他课时可以映射到其他视频ID
+            return lesson.id; // 默认使用课时ID作为视频ID
+        },
+        
         // 处理请求访问权限
         handleRequestAccess() {
             if (this.course.access_level === 'premium') {
@@ -289,6 +316,11 @@ window.CourseDetailPage = {
         onVideoEnded() {
             console.log('视频播放结束');
             // 可以在这里记录播放完成等
+        },
+        
+        onVideoError(error) {
+            console.error('视频播放错误:', error);
+            // 可以在这里处理播放错误
         },
         
         onVideoTimeUpdate(data) {

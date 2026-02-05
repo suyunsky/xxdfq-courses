@@ -622,3 +622,84 @@
         font-size: 1.2rem;
     }
 }
+
+/* ============================================
+   用户菜单样式
+   ============================================ */
+
+.art-user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.art-user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--space-sm);
+    background: white;
+    border: 1px solid var(--color-primary-200);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 200px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all var(--transition-normal);
+}
+
+.art-user-menu:hover .art-user-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.art-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    border-bottom: 1px solid var(--color-primary-100);
+}
+
+.art-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.art-dropdown-item:hover {
+    background: var(--color-primary-50);
+    color: var(--color-accent-art);
+}
+
+.art-dropdown-item i {
+    margin-right: var(--space-sm);
+    width: 20px;
+    text-align: center;
+}
+
+.art-dropdown-divider {
+    height: 1px;
+    background: var(--color-primary-200);
+    margin: var(--space-sm) 0;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .art-user-dropdown {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        transform: translateY(100%);
+    }
+    
+    .art-user-menu:hover .art-user-dropdown {
+        transform: translateY(0);
+    }
+}

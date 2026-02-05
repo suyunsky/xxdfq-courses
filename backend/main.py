@@ -3,8 +3,9 @@
 基于FastAPI构建，提供完整的课程管理、用户认证、权限控制等功能
 """
 
-from fastapi import FastAPI, HTTPException, Depends, status, Query
+from fastapi import FastAPI, HTTPException, Depends, status, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
@@ -20,6 +21,13 @@ from auth import (
     security
 )
 from vod_api import router as vod_router
+from dependencies import (
+    get_session_manager, get_cookie_manager,
+    get_current_user_from_session, get_current_user_from_session_optional,
+    get_current_user_hybrid, require_current_user_hybrid
+)
+from session_manager import WebSessionManager
+from cookie_utils import CookieManager
 
 # 创建FastAPI应用
 app = FastAPI(
@@ -30,13 +38,14 @@ app = FastAPI(
     redoc_url="/api/redoc"
 )
 
-# 配置CORS
+# 配置CORS - 允许特定来源（支持HttpOnly Cookie）
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:8080", "http://localhost:5173"],
+    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080"],  # 允许前端来源
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["Set-Cookie"],  # 允许前端访问Set-Cookie头
 )
 
 # Pydantic模型
@@ -760,6 +769,187 @@ async def create_lesson(
         is_free_preview=new_lesson.is_free_preview,
         sort_order=new_lesson.sort_order,
         created_at=new_lesson.created_at
+    )
+
+# ============================================
+# Web会话认证API（HttpOnly Cookie + Server-Side Session）
+# ============================================
+
+class WebLoginRequest(BaseModel):
+    username: str
+    password: str
+    remember_me: bool = False
+
+class WebLoginResponse(BaseModel):
+    success: bool
+    message: str
+    user: Optional[UserResponse] = None
+
+class WebLogoutResponse(BaseModel):
+    success: bool
+    message: str
+
+class SessionInfo(BaseModel):
+    session_id: str
+    device_info: str
+    ip_address: str
+    last_activity_at: datetime
+    expires_at: datetime
+    created_at: datetime
+
+class SessionsResponse(BaseModel):
+    sessions: List[SessionInfo]
+
+@app.post("/api/auth/web/login", response_model=WebLoginResponse)
+async def web_login(
+    login_data: WebLoginRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    session_manager: WebSessionManager = Depends(get_session_manager),
+    cookie_manager: CookieManager = Depends(get_cookie_manager)
+):
+    """Web用户登录（使用HttpOnly Cookie）"""
+    # 验证用户凭据
+    user = authenticate_user(db, login_data.username, login_data.password)
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="用户名或密码错误",
+        )
+    
+    # 创建Web会话
+    session_id = session_manager.create_session(user, request)
+    
+    # 设置Cookie过期时间（记住我：30天，否则：7天）
+    max_age = 3600 * 24 * 30 if login_data.remember_me else 3600 * 24 * 7
+    
+    # 构建响应 - 确保所有datetime对象都转换为字符串
+    response = JSONResponse(content={
+        "success": True,
+        "message": "登录成功",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "full_name": user.full_name,
+            "role": user.role,
+            "avatar_url": user.avatar_url,
+            "bio": user.bio,
+            "created_at": user.created_at.isoformat() if user.created_at else None
+        }
+    })
+    
+    # 设置HttpOnly Cookie
+    cookie_manager.set_session_cookie(response, session_id, max_age=max_age)
+    
+    return response
+
+@app.post("/api/auth/web/logout", response_model=WebLogoutResponse)
+async def web_logout(
+    request: Request,
+    session_manager: WebSessionManager = Depends(get_session_manager),
+    cookie_manager: CookieManager = Depends(get_cookie_manager),
+    current_user: User = Depends(require_current_user_hybrid)
+):
+    """Web用户登出"""
+    # 从Cookie获取会话ID
+    session_id = cookie_manager.get_session_id(request)
+    
+    if session_id:
+        # 使会话失效
+        session_manager.invalidate_session(session_id, "logout")
+    
+    # 构建响应
+    response = JSONResponse(content={
+        "success": True,
+        "message": "登出成功"
+    })
+    
+    # 删除Cookie
+    cookie_manager.delete_session_cookie(response)
+    
+    return response
+
+@app.post("/api/auth/web/logout-all", response_model=WebLogoutResponse)
+async def web_logout_all(
+    current_user: User = Depends(require_current_user_hybrid),
+    session_manager: WebSessionManager = Depends(get_session_manager),
+    cookie_manager: CookieManager = Depends(get_cookie_manager),
+    request: Request = None
+):
+    """登出所有设备"""
+    # 使用户的所有会话失效
+    count = session_manager.invalidate_user_sessions(current_user.id, "logout_all")
+    
+    # 构建响应
+    response = JSONResponse(content={
+        "success": True,
+        "message": f"已从{count}个设备登出"
+    })
+    
+    # 删除当前Cookie
+    if request:
+        cookie_manager.delete_session_cookie(response)
+    
+    return response
+
+@app.get("/api/auth/web/sessions", response_model=SessionsResponse)
+async def get_web_sessions(
+    current_user: User = Depends(require_current_user_hybrid),
+    session_manager: WebSessionManager = Depends(get_session_manager)
+):
+    """获取用户的Web会话列表"""
+    sessions = session_manager.get_user_sessions(current_user.id)
+    
+    return SessionsResponse(
+        sessions=[
+            SessionInfo(
+                session_id=session["session_id"],
+                device_info=session["device_info"],
+                ip_address=session["ip_address"],
+                last_activity_at=session["last_activity_at"],
+                expires_at=session["expires_at"],
+                created_at=session["created_at"]
+            )
+            for session in sessions
+        ]
+    )
+
+@app.get("/api/auth/web/me", response_model=UserResponse)
+async def get_web_current_user(
+    current_user: User = Depends(get_current_user_from_session)
+):
+    """获取当前Web用户信息（使用Session）"""
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        role=current_user.role,
+        avatar_url=current_user.avatar_url,
+        bio=current_user.bio,
+        created_at=current_user.created_at
+    )
+
+# ============================================
+# 混合认证API（向后兼容）
+# ============================================
+
+@app.get("/api/auth/hybrid/me", response_model=UserResponse)
+async def get_hybrid_current_user(
+    current_user: User = Depends(require_current_user_hybrid)
+):
+    """获取当前用户信息（混合认证：Session优先，JWT备用）"""
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        role=current_user.role,
+        avatar_url=current_user.avatar_url,
+        bio=current_user.bio,
+        created_at=current_user.created_at
     )
 
 if __name__ == "__main__":
