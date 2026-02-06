@@ -8,8 +8,8 @@
     <!-- Vue 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     
-    <!-- 艺术字体 -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- 本地字体（避免Google Fonts连接问题） -->
+    <link href="/fonts/google-fonts.css" rel="stylesheet">
     
     <!-- 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,9 +21,9 @@
     <link rel="stylesheet" href="https://web.sdk.qcloud.com/player/tcplayer/release/v4.5.0/tcplayer.min.css">
     
     <!-- 样式 -->
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
     
     <!-- 网站图标 -->
     <link rel="icon" type="image/svg+xml" href="assets/icons/palette.svg">
@@ -43,25 +43,25 @@
     <div id="app"></div>
     
     <!-- 组件脚本 -->
-    <script src="js/components/NavBar.js" type="module"></script>
-    <script src="js/components/Footer.js" type="module"></script>
-    <script src="js/components/TencentVodPlayer.js" type="module"></script>
+    <script src="/js/components/NavBar.js" type="module"></script>
+    <script src="/js/components/Footer.js" type="module"></script>
+    <script src="/js/components/TencentVodPlayer.js" type="module"></script>
     
     <!-- 页面组件 -->
-    <script src="js/pages/HomePage.js" type="module"></script>
-    <script src="js/pages/CoursesPage.js" type="module"></script>
-    <script src="js/pages/CourseDetailPage.js" type="module"></script>
-    <script src="js/pages/DashboardPage.js" type="module"></script>
-    <script src="js/pages/LoginPage.js" type="module"></script>
+    <script src="/js/pages/HomePage.js" type="module"></script>
+    <script src="/js/pages/CoursesPage.js" type="module"></script>
+    <script src="/js/pages/CourseDetailPage.js" type="module"></script>
+    <script src="/js/pages/DashboardPage.js" type="module"></script>
+    <script src="/js/pages/LoginPage.js" type="module"></script>
     
     <!-- 工具和核心 -->
-    <script src="js/utils/artEffects.js" type="module"></script>
+    <script src="/js/utils/artEffects.js" type="module"></script>
     
     <!-- 腾讯云点播播放器脚本 -->
     <script src="https://web.sdk.qcloud.com/player/tcplayer/release/v4.5.0/tcplayer.v4.5.0.min.js"></script>
     
     <!-- 应用入口 -->
-    <script src="js/app.js" type="module"></script>
+    <script src="/js/app.js" type="module"></script>
     
     <script>
         // 创建艺术背景点

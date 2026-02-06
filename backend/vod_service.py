@@ -39,7 +39,8 @@ class TencentVodService:
         self.client = vod_client.VodClient(self.cred, self.region)
         
         # 签名有效期（秒）
-        self.signature_expire_seconds = 7200  # 2小时
+        # 设置为10年（315360000秒），接近永不过期
+        self.signature_expire_seconds = 315360000  # 10年
         
     def generate_psign(self, file_id: str, user_id: Optional[int] = None) -> Dict[str, Any]:
         """
