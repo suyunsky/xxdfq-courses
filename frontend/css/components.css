@@ -542,29 +542,8 @@
     line-height: 1.5;
 }
 
-/* 视频信息 */
-.vod-video-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
-    padding: 10px 15px;
-    z-index: 2;
-}
-
-.video-meta {
-    display: flex;
-    gap: 15px;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.85rem;
-}
-
-.video-meta span {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
+/* 视频信息（已移除，避免与播放器控制栏重叠） */
+/* 视频时长和分辨率信息现在显示在播放器控制栏中 */
 
 /* 适配TCPlayer主题 */
 .tcplayer {
@@ -593,15 +572,6 @@
 @media (max-width: 768px) {
     .tencent-vod-player {
         min-height: 250px;
-    }
-    
-    .vod-video-info {
-        padding: 8px 10px;
-    }
-    
-    .video-meta {
-        font-size: 0.75rem;
-        gap: 10px;
     }
 }
 

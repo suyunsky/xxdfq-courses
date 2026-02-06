@@ -36,17 +36,8 @@ window.TencentVodPlayer = {
                 </button>
             </div>
             
-            <!-- 视频信息 -->
-            <div v-if="hasAccess && !isLoading && !error" class="vod-video-info">
-                <div class="video-meta">
-                    <span v-if="videoDuration">
-                        <i class="fas fa-clock"></i> {{ formatDuration(videoDuration) }}
-                    </span>
-                    <span v-if="videoResolution">
-                        <i class="fas fa-expand"></i> {{ videoResolution }}
-                    </span>
-                </div>
-            </div>
+            <!-- 视频信息（已移除，避免与播放器控制栏重叠） -->
+            <!-- 视频时长和分辨率信息现在显示在播放器控制栏中 -->
         </div>
     `,
     props: {
