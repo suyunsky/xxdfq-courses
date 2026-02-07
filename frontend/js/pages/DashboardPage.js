@@ -27,15 +27,15 @@ window.DashboardPage = {
                                 </p>
                                 <div style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
                                     <div style="text-align: center; padding: var(--space-md); background: var(--color-primary-50); border-radius: var(--border-radius-lg); min-width: 100px;">
-                                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--color-secondary-800);">6</div>
+                                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--color-secondary-800);">{{ userStats.completed_courses }}</div>
                                         <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: var(--space-xs);">已学习课程</div>
                                     </div>
                                     <div style="text-align: center; padding: var(--space-md); background: var(--color-primary-50); border-radius: var(--border-radius-lg); min-width: 100px;">
-                                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--color-secondary-800);">24</div>
+                                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--color-secondary-800);">{{ Math.round(userStats.total_learning_hours) }}</div>
                                         <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: var(--space-xs);">学习时长(小时)</div>
                                     </div>
                                     <div style="text-align: center; padding: var(--space-md); background: var(--color-primary-50); border-radius: var(--border-radius-lg); min-width: 100px;">
-                                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--color-secondary-800);">3</div>
+                                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--color-secondary-800);">{{ userStats.ongoing_courses }}</div>
                                         <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: var(--space-xs);">进行中课程</div>
                                     </div>
                                 </div>
@@ -71,27 +71,27 @@ window.DashboardPage = {
                     
                     <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
                         <!-- 进行中课程 -->
-                        <div v-if="activeTab === 'ongoing'" class="art-card art-shadow" v-for="course in ongoingCourses" :key="course.id" style="padding: var(--space-xl);">
+                        <div v-if="activeTab === 'ongoing'" class="art-card art-shadow" v-for="item in ongoingCourses" :key="item.course.id" style="padding: var(--space-xl);">
                             <div style="display: flex; gap: var(--space-lg); align-items: center;">
-                                <div :style="{ width: '60px', height: '60px', borderRadius: 'var(--border-radius-lg)', background: course.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: 'white' }">
-                                    <i :class="course.icon"></i>
+                                <div :style="{ width: '60px', height: '60px', borderRadius: 'var(--border-radius-lg)', background: item.course.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: 'white' }">
+                                    {{ item.course.icon }}
                                 </div>
                                 <div style="flex: 1;">
-                                    <h3 style="margin-bottom: var(--space-xs);">{{ course.title }}</h3>
+                                    <h3 style="margin-bottom: var(--space-xs);">{{ item.course.title }}</h3>
                                     <p style="color: var(--color-text-secondary); font-size: 0.875rem; margin-bottom: var(--space-sm);">
-                                        {{ course.description }}
+                                        {{ item.course.short_description || item.course.description.substring(0, 100) + '...' }}
                                     </p>
                                     <div style="display: flex; align-items: center; gap: var(--space-md);">
                                         <div style="flex: 1;">
                                             <div style="height: 6px; background: var(--color-primary-200); border-radius: 3px; overflow: hidden;">
-                                                <div :style="{ width: course.progress + '%', height: '100%', background: 'var(--color-accent-art)' }"></div>
+                                                <div :style="{ width: item.progress + '%', height: '100%', background: 'var(--color-accent-art)' }"></div>
                                             </div>
                                             <div style="display: flex; justify-content: space-between; margin-top: var(--space-xs);">
-                                                <span style="font-size: 0.75rem; color: var(--color-text-muted);">进度 {{ course.progress }}%</span>
-                                                <span style="font-size: 0.75rem; color: var(--color-text-muted);">{{ course.completed }}/{{ course.total }} 节课</span>
+                                                <span style="font-size: 0.75rem; color: var(--color-text-muted);">进度 {{ item.progress }}%</span>
+                                                <span style="font-size: 0.75rem; color: var(--color-text-muted);">{{ item.lesson_count || 0 }} 节课</span>
                                             </div>
                                         </div>
-                                        <button class="art-btn" @click="continueCourse(course.id)">
+                                        <button class="art-btn" @click="continueCourse(item.course.id)">
                                             继续学习
                                         </button>
                                     </div>
@@ -100,15 +100,15 @@ window.DashboardPage = {
                         </div>
                         
                         <!-- 已完成课程 -->
-                        <div v-if="activeTab === 'completed'" class="art-card art-shadow" v-for="course in completedCourses" :key="course.id" style="padding: var(--space-xl);">
+                        <div v-if="activeTab === 'completed'" class="art-card art-shadow" v-for="item in completedCourses" :key="item.course.id" style="padding: var(--space-xl);">
                             <div style="display: flex; gap: var(--space-lg); align-items: center;">
-                                <div :style="{ width: '60px', height: '60px', borderRadius: 'var(--border-radius-lg)', background: course.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: 'white' }">
-                                    <i :class="course.icon"></i>
+                                <div :style="{ width: '60px', height: '60px', borderRadius: 'var(--border-radius-lg)', background: item.course.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: 'white' }">
+                                    {{ item.course.icon }}
                                 </div>
                                 <div style="flex: 1;">
-                                    <h3 style="margin-bottom: var(--space-xs);">{{ course.title }}</h3>
+                                    <h3 style="margin-bottom: var(--space-xs);">{{ item.course.title }}</h3>
                                     <p style="color: var(--color-text-secondary); font-size: 0.875rem; margin-bottom: var(--space-sm);">
-                                        {{ course.description }}
+                                        {{ item.course.short_description || item.course.description.substring(0, 100) + '...' }}
                                     </p>
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <span style="color: var(--color-accent-art); font-weight: 500;">
@@ -116,7 +116,7 @@ window.DashboardPage = {
                                             已完成
                                         </span>
                                         <span style="font-size: 0.875rem; color: var(--color-text-muted);">
-                                            完成时间: {{ course.completedDate }}
+                                            完成时间: {{ item.completed_at ? new Date(item.completed_at).toLocaleDateString() : '最近' }}
                                         </span>
                                     </div>
                                 </div>
@@ -127,16 +127,16 @@ window.DashboardPage = {
                         <div v-if="activeTab === 'available'" class="art-card art-shadow" v-for="course in availableCourses" :key="course.id" style="padding: var(--space-xl);">
                             <div style="display: flex; gap: var(--space-lg); align-items: center;">
                                 <div :style="{ width: '60px', height: '60px', borderRadius: 'var(--border-radius-lg)', background: course.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: 'white' }">
-                                    <i :class="course.icon"></i>
+                                    {{ course.icon }}
                                 </div>
                                 <div style="flex: 1;">
                                     <h3 style="margin-bottom: var(--space-xs);">{{ course.title }}</h3>
                                     <p style="color: var(--color-text-secondary); font-size: 0.875rem; margin-bottom: var(--space-sm);">
-                                        {{ course.description }}
+                                        {{ course.short_description || course.description.substring(0, 100) + '...' }}
                                     </p>
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span :style="{ padding: 'var(--space-xs) var(--space-sm)', borderRadius: 'var(--border-radius-sm)', fontSize: '0.75rem', fontWeight: '500', background: course.status === '可学习' ? '#e8f5e9' : '#fff3e0', color: course.status === '可学习' ? '#2e7d32' : '#f57c00' }">
-                                            {{ course.status }}
+                                        <span :style="{ padding: 'var(--space-xs) var(--space-sm)', borderRadius: 'var(--border-radius-sm)', fontSize: '0.75rem', fontWeight: '500', background: course.access_level === 'free' ? '#e8f5e9' : '#fff3e0', color: course.access_level === 'free' ? '#2e7d32' : '#f57c00' }">
+                                            {{ course.access_level === 'free' ? '免费课程' : '付费课程' }}
                                         </span>
                                         <button class="art-btn art-btn-primary" @click="startCourse(course.id)">
                                             开始学习
@@ -228,59 +228,37 @@ window.DashboardPage = {
     data() {
         return {
             activeTab: 'ongoing',
-            ongoingCourses: [
-                {
-                    id: 1,
-                    title: '色彩感知启蒙',
-                    description: '通过色彩游戏，唤醒孩子对颜色的敏感度和兴趣',
-                    icon: 'fas fa-palette',
-                    color: 'linear-gradient(135deg, #ff9a9e, #fad0c4)',
-                    progress: 75,
-                    completed: 6,
-                    total: 8
-                },
-                {
-                    id: 2,
-                    title: '自由涂鸦表达',
-                    description: '鼓励自由创作，建立绘画自信和表达欲望',
-                    icon: 'fas fa-paint-brush',
-                    color: 'linear-gradient(135deg, #a1c4fd, #c2e9fb)',
-                    progress: 40,
-                    completed: 4,
-                    total: 10
-                }
-            ],
-            completedCourses: [
-                {
-                    id: 3,
-                    title: '基础线条练习',
-                    description: '掌握基本线条技巧，为绘画打下基础',
-                    icon: 'fas fa-pen',
-                    color: 'linear-gradient(135deg, #84fab0, #8fd3f4)',
-                    completedDate: '2024-01-15'
-                }
-            ],
-            availableCourses: [
-                {
-                    id: 4,
-                    title: '形状与构图',
-                    description: '学习基本形状和构图原理，理解画面结构',
-                    icon: 'fas fa-shapes',
-                    color: 'linear-gradient(135deg, #ffecd2, #fcb69f)',
-                    status: '可学习'
-                },
-                {
-                    id: 5,
-                    title: '光影与色彩',
-                    description: '探索光影关系，学习色彩搭配和情感表达',
-                    icon: 'fas fa-sun',
-                    color: 'linear-gradient(135deg, #84fab0, #8fd3f4)',
-                    status: '需解锁'
-                }
-            ]
+            userStats: {
+                total_courses: 0,
+                completed_courses: 0,
+                ongoing_courses: 0,
+                total_learning_hours: 0,
+                learning_days: 0
+            },
+            userCourses: [],
+            allCourses: [],
+            isLoading: true,
+            error: null
         };
     },
     computed: {
+        // 进行中课程（未完成）
+        ongoingCourses() {
+            return this.userCourses.filter(course => !course.completed);
+        },
+        
+        // 已完成课程
+        completedCourses() {
+            return this.userCourses.filter(course => course.completed);
+        },
+        
+        // 可学习课程（用户未关联的课程）
+        availableCourses() {
+            const userCourseIds = this.userCourses.map(course => course.course.id);
+            return this.allCourses.filter(course => !userCourseIds.includes(course.id));
+        },
+        
+        // 当前标签页的课程
         getCurrentCourses() {
             switch (this.activeTab) {
                 case 'ongoing': return this.ongoingCourses;
@@ -289,6 +267,7 @@ window.DashboardPage = {
                 default: return [];
             }
         },
+        
         getEmptyStateMessage() {
             switch (this.activeTab) {
                 case 'ongoing': return '暂无进行中的课程，快去开始学习吧！';
@@ -298,16 +277,81 @@ window.DashboardPage = {
             }
         }
     },
+    
+    mounted() {
+        this.loadUserData();
+    },
     methods: {
+        async loadUserData() {
+            this.isLoading = true;
+            this.error = null;
+            
+            try {
+                // 使用全局apiBaseUrl
+                const apiBaseUrl = window.apiBaseUrl || '';
+                
+                // 加载用户统计 - 使用Cookie认证（credentials: 'include'）
+                const statsResponse = await fetch(apiBaseUrl + '/api/user/stats', {
+                    credentials: 'include' // 重要：包含Cookie
+                });
+                
+                if (!statsResponse.ok) {
+                    throw new Error(`获取统计失败: ${statsResponse.status}`);
+                }
+                
+                this.userStats = await statsResponse.json();
+                
+                // 加载用户课程 - 使用Cookie认证
+                const coursesResponse = await fetch(apiBaseUrl + '/api/user/courses', {
+                    credentials: 'include' // 重要：包含Cookie
+                });
+                
+                if (!coursesResponse.ok) {
+                    throw new Error(`获取课程失败: ${coursesResponse.status}`);
+                }
+                
+                this.userCourses = await coursesResponse.json();
+                
+                // 加载所有课程（用于"可学习"标签页）- 公开API，不需要认证
+                const allCoursesResponse = await fetch(apiBaseUrl + '/api/courses');
+                
+                if (!allCoursesResponse.ok) {
+                    throw new Error(`获取所有课程失败: ${allCoursesResponse.status}`);
+                }
+                
+                this.allCourses = await allCoursesResponse.json();
+                
+                console.log('用户数据加载成功:', {
+                    stats: this.userStats,
+                    userCourses: this.userCourses.length,
+                    allCourses: this.allCourses.length
+                });
+                
+            } catch (error) {
+                console.error('加载用户数据失败:', error);
+                this.error = error.message;
+                
+                // 如果是因为认证问题，重定向到登录页
+                if (error.message.includes('401') || error.message.includes('认证')) {
+                    this.$emit('navigate', '/login');
+                }
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
         editProfile() {
             this.$emit('navigate', '/profile');
         },
+        
         continueCourse(courseId) {
-            this.$emit('navigate', `/course/${courseId}/learn`);
+            this.$emit('navigate', `/course/${courseId}`);
         },
+        
         startCourse(courseId) {
-            this.$emit('navigate', `/course/${courseId}/learn`);
+            this.$emit('navigate', `/course/${courseId}`);
         },
+        
         goToCourses() {
             this.$emit('navigate', '/courses');
         }

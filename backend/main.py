@@ -11,7 +11,7 @@ from typing import List, Optional
 from datetime import datetime
 import uvicorn
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 
 # 导入自定义模块
 from models import get_db, create_tables, User, Course, UserCourse, Lesson, Enrollment, LearningRecord
@@ -41,11 +41,12 @@ app = FastAPI(
 # 配置CORS - 允许特定来源（支持HttpOnly Cookie）
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080"],  # 允许前端来源
+    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080", "null"],  # 允许前端来源，包括本地文件
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["Set-Cookie"],  # 允许前端访问Set-Cookie头
+    allow_headers=["*"],  # 允许所有请求头
+    expose_headers=["Set-Cookie", "Content-Disposition"],  # 允许前端访问Set-Cookie头
+    max_age=3600,  # 预检请求缓存时间
 )
 
 # Pydantic模型
@@ -166,8 +167,8 @@ async def root():
 async def health_check(db: Session = Depends(get_db)):
     """健康检查"""
     try:
-        # 测试数据库连接
-        db.execute("SELECT 1")
+        # 测试数据库连接 - 使用text()包装SQL
+        db.execute(text("SELECT 1"))
         return {
             "status": "healthy",
             "timestamp": datetime.utcnow(),
@@ -464,7 +465,7 @@ async def get_video_access(
 @app.get("/api/user/courses")
 async def get_user_courses(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_current_user_hybrid)  # 使用混合认证
 ):
     """获取用户的课程"""
     user_courses = db.query(UserCourse).filter(
@@ -613,7 +614,7 @@ async def update_course_progress(
 @app.get("/api/user/stats")
 async def get_user_stats(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_current_user_hybrid)  # 使用混合认证
 ):
     """获取用户学习统计"""
     # 获取用户课程

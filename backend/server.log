@@ -1,0 +1,18 @@
+INFO:     Will watch for changes in these directories: ['/Users/maowenhui/Downloads/xxdfq/xxdfq-courses/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [33925] using StatReload
+INFO:     Started server process [33986]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+数据库表已创建
+INFO:     127.0.0.1:63417 - "GET /api/user/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63596 - "GET /api/user/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63677 - "GET /api/user/courses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56332 - "GET /api/auth/web/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56332 - "GET /api/user/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56332 - "GET /api/user/courses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56376 - "GET /api/courses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64926 - "GET /api/courses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64948 - "GET /api/user/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64948 - "GET /api/user/courses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64954 - "GET /api/courses HTTP/1.1" 200 OK
