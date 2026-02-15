@@ -177,11 +177,16 @@ window.CourseDetailPage = {
             this.error = null;
             
             try {
-                const courseResponse = await fetch(`http://localhost:8000/api/courses/${this.courseId}`);
+                const apiBaseUrl = window.apiBaseUrl || '';
+                const courseResponse = await fetch(`${apiBaseUrl}/api/courses/${this.courseId}`, {
+                    credentials: 'include'
+                });
                 if (!courseResponse.ok) throw new Error(`加载课程失败: HTTP ${courseResponse.status}`);
                 this.course = await courseResponse.json();
                 
-                const lessonsResponse = await fetch(`http://localhost:8000/api/courses/${this.courseId}/lessons`);
+                const lessonsResponse = await fetch(`${apiBaseUrl}/api/courses/${this.courseId}/lessons`, {
+                    credentials: 'include'
+                });
                 if (!lessonsResponse.ok) throw new Error(`加载章节失败: HTTP ${lessonsResponse.status}`);
                 this.lessons = await lessonsResponse.json();
                 

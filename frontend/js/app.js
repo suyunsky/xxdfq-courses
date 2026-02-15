@@ -1,9 +1,11 @@
 // Vue应用入口文件 - 简化版本
 
 // 全局API配置 - 统一的后端API基础URL
-window.apiBaseUrl = 'http://localhost:8000'; // 后端运行在8000端口
+// 使用相对路径，让Nginx代理到后端服务
+window.apiBaseUrl = ''; // 使用相对路径，Nginx会将/api/代理到后端
 
 console.log('API基础URL配置:', window.apiBaseUrl);
+console.log('当前部署模式: Nginx代理模式');
 
 document.addEventListener('DOMContentLoaded', function() {
     // 等待Vue加载
@@ -39,7 +41,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     '/register': 'RegisterPage',
                     '/dashboard': 'DashboardPage',
                     '/growth-path': 'GrowthPathPage',
-                    '/about': 'AboutPage'
+                    '/about': 'AboutPage',
+                    '/gallery': 'PhotoGalleryPage',
+                    '/photos': 'PhotoGalleryPage'
                 }
             }
         },
@@ -53,7 +57,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 'RegisterPage': { template: '<div style="padding: 100px; text-align: center;"><h2>注册页面开发中...</h2></div>' },
                 'DashboardPage': window.DashboardPage || { template: '<div style="padding: 100px; text-align: center;"><h2>用户中心开发中...</h2></div>' },
                 'GrowthPathPage': { template: '<div style="padding: 100px; text-align: center;"><h2>成长路径页面开发中...</h2></div>' },
-                'AboutPage': { template: '<div style="padding: 100px; text-align: center;"><h2>关于我们页面开发中...</h2></div>' }
+                'AboutPage': { template: '<div style="padding: 100px; text-align: center;"><h2>关于我们页面开发中...</h2></div>' },
+                'PhotoGalleryPage': window.PhotoGalleryPage || { template: '<div style="padding: 100px; text-align: center;"><h2>照片展示页面开发中...</h2></div>' }
             },
         methods: {
             handleNavigate(path) {
@@ -195,6 +200,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (window.CourseDetailPage) {
             app.component('CourseDetailPage', window.CourseDetailPage);
+        }
+        if (window.PhotoGalleryPage) {
+            app.component('PhotoGalleryPage', window.PhotoGalleryPage);
         }
         
         app.mount('#app');

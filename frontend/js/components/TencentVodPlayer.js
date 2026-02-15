@@ -110,7 +110,7 @@ window.TencentVodPlayer = {
             playbackParams: null,
             videoInfo: null,
             // API配置
-            apiBaseUrl: window.API_BASE_URL || 'http://localhost:8000',
+            apiBaseUrl: window.apiBaseUrl || '',
             // 轮询检查播放参数
             paramCheckInterval: null
         };

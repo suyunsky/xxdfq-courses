@@ -28,7 +28,7 @@ class SPAServer(http.server.SimpleHTTPRequestHandler):
             return
         
         # 检查是否是静态文件请求
-        if path.startswith('/css/') or path.startswith('/js/') or path.startswith('/assets/'):
+        if path.startswith('/css/') or path.startswith('/js/') or path.startswith('/assets/') or path.startswith('/data/'):
             # 检查文件是否存在
             file_path = os.path.join(FRONTEND_DIR, path[1:])  # 去掉开头的'/'
             if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -37,6 +37,8 @@ class SPAServer(http.server.SimpleHTTPRequestHandler):
                     self._serve_js_file(file_path)
                 elif path.endswith('.css'):
                     self._serve_css_file(file_path)
+                elif path.endswith('.json'):
+                    self._serve_json_file(file_path)
                 else:
                     # 使用父类方法提供其他静态文件
                     super().do_GET()
@@ -179,6 +181,20 @@ h1, h2, h3, h4, h5, h6 {
             self.wfile.write(content)
         except Exception as e:
             self.send_error(500, f"读取文件失败: {str(e)}")
+    
+    def _serve_json_file(self, file_path):
+        """提供JSON文件，设置正确的MIME类型"""
+        try:
+            with open(file_path, 'rb') as f:
+                content = f.read()
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Content-Length', str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
+        except Exception as e:
+            self.send_error(500, f"读取JSON文件失败: {str(e)}")
     
     def end_headers(self):
         """添加CORS头"""

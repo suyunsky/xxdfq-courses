@@ -1,0 +1,161 @@
+{
+  "photos": [
+    {
+      "id": 1,
+      "title": "户外写生：春天的色彩探索",
+      "description": "孩子们在公园里观察春天的色彩变化，学习用画笔记录大自然的美丽",
+      "category": "outdoor",
+      "filename": "xxdfq-outdoor1.jpeg",
+      "date": "2024-03-15",
+      "featured": true,
+      "tags": ["户外教学", "自然观察", "色彩学习"]
+    },
+    {
+      "id": 2,
+      "title": "小明的第一幅水彩作品",
+      "description": "8岁小明的第一幅完整水彩画，展现了惊人的色彩感知能力",
+      "category": "artworks",
+      "filename": "xxdfq-art1.jpeg",
+      "date": "2024-03-10",
+      "featured": true,
+      "tags": ["作品展示", "水彩画", "儿童艺术"]
+    },
+    {
+      "id": 3,
+      "title": "亲子美术课堂",
+      "description": "家长和孩子一起创作，在艺术中建立情感连接",
+      "category": "artworks",
+      "filename": "xxdfq-art2.jpeg",
+      "date": "2024-03-08",
+      "featured": true,
+      "tags": ["家长参与", "亲子互动", "家庭艺术"]
+    },
+    {
+      "id": 4,
+      "title": "专注的课堂时刻",
+      "description": "孩子们在课堂上专注地完成自己的作品，老师在一旁细心指导",
+      "category": "artworks",
+      "filename": "xxdfq-art3.jpeg",
+      "date": "2024-03-05",
+      "featured": false,
+      "tags": ["课堂教学", "专注力", "师生互动"]
+    },
+    {
+      "id": 5,
+      "title": "夏日写生：荷花池畔",
+      "description": "夏季户外写生活动，孩子们在荷花池边学习观察和描绘",
+      "category": "outdoor",
+      "filename": "xxdfq-outdoor2.jpeg",
+      "date": "2024-06-20",
+      "featured": false,
+      "tags": ["夏季活动", "荷花写生", "户外教学"]
+    },
+    {
+      "id": 6,
+      "title": "色彩混合实验",
+      "description": "孩子们在课堂上学习色彩理论，通过混合创造新的颜色",
+      "category": "artworks",
+      "filename": "xxdfq-art4.jpeg",
+      "date": "2024-02-28",
+      "featured": false,
+      "tags": ["色彩理论", "实验学习", "创意探索"]
+    },
+    {
+      "id": 7,
+      "title": "小丽的抽象画作品",
+      "description": "10岁小丽的抽象画作品，展现了独特的艺术表达方式",
+      "category": "artworks",
+      "filename": "xxdfq-art5.jpeg",
+      "date": "2024-03-12",
+      "featured": false,
+      "tags": ["抽象艺术", "个性表达", "创意作品"]
+    },
+    {
+      "id": 8,
+      "title": "家长艺术工作坊",
+      "description": "专门为家长举办的艺术工作坊，让家长也体验艺术创作的乐趣",
+      "category": "parents",
+      "filename": "xxdfq-parents1.jpeg",
+      "date": "2024-02-25",
+      "featured": false,
+      "tags": ["家长工作坊", "成人艺术", "家庭学习"]
+    },
+    {
+      "id": 9,
+      "title": "秋日落叶创作",
+      "description": "利用秋天的落叶进行创意拼贴画创作，培养孩子的观察力和创造力",
+      "category": "outdoor",
+      "filename": "xxdfq-outdoor3.jpeg",
+      "date": "2023-11-10",
+      "featured": false,
+      "tags": ["秋季活动", "自然材料", "创意拼贴"]
+    },
+    {
+      "id": 10,
+      "title": "陶艺课堂",
+      "description": "孩子们在陶艺课上学习手工制作，体验不同艺术媒介",
+      "category": "parents",
+      "filename": "xxdfq-parents2.jpeg",
+      "date": "2024-01-15",
+      "featured": false,
+      "tags": ["陶艺", "手工制作", "多媒介艺术"]
+    },
+    {
+      "id": 11,
+      "title": "小华的风景画",
+      "description": "9岁小华的风景画作品，展现了良好的空间感和色彩运用",
+      "category": "parents",
+      "filename": "xxdfq-parents3.jpeg",
+      "date": "2024-03-18",
+      "featured": false,
+      "tags": ["风景画", "空间感", "色彩运用"]
+    },
+    {
+      "id": 12,
+      "title": "家庭艺术日",
+      "description": "全家一起参与的艺术创作活动，创造美好的家庭回忆",
+      "category": "parents",
+      "filename": "xxdfq-parents3.jpeg",
+      "date": "2024-03-02",
+      "featured": false,
+      "tags": ["家庭活动", "亲子创作", "美好回忆"]
+    }
+  ],
+  "categories": [
+    {
+      "id": "all",
+      "name": "全部照片",
+      "description": "展示所有教学场景照片",
+      "icon": "fas fa-images"
+    },
+    {
+      "id": "outdoor",
+      "name": "外出写生",
+      "description": "户外教学和写生活动",
+      "icon": "fas fa-tree"
+    },
+    {
+      "id": "artworks",
+      "name": "作品展示",
+      "description": "孩子们的艺术作品",
+      "icon": "fas fa-palette"
+    },
+    {
+      "id": "classroom",
+      "name": "课堂场景11111",
+      "description": "室内教学和课堂互动2222",
+      "icon": "fas fa-chalkboard-teacher"
+    },
+    {
+      "id": "parents",
+      "name": "家长课堂",
+      "description": "家长参与的教学活动",
+      "icon": "fas fa-users"
+    }
+  ],
+  "pageInfo": {
+    "title": "真实教学场景 · 见证成长每一步",
+    "subtitle": "通过照片记录孩子们的艺术探索之旅，展示机构的特色教学和成果",
+    "description": "这里记录了小小达芬奇艺术教育机构的真实教学场景，包括户外写生、课堂互动、作品展示和家长参与活动。每一张照片都是一个故事，见证着孩子们的成长和进步。"
+  }
+}

@@ -15,7 +15,7 @@ window.NavBar = {
                 <ul class="art-navbar-menu">
                     <li><a href="/" class="art-navbar-link">首页</a></li>
                     <li><a href="/courses" class="art-navbar-link">在线课程</a></li>
-                    <li><a href="/growth-path" class="art-navbar-link">成长路径</a></li>
+                    <li><a href="/gallery" class="art-navbar-link">成长路径</a></li>
                     <li><a href="/about" class="art-navbar-link">关于我们</a></li>
                 </ul>
                 

@@ -305,7 +305,14 @@ window.CoursesPage = {
             this.error = null;
             
             try {
-                const response = await fetch('http://localhost:8000/api/courses');
+                // 使用全局apiBaseUrl配置
+                const apiBaseUrl = window.apiBaseUrl || '';
+                const apiUrl = apiBaseUrl + '/api/courses';
+                console.log('API请求URL:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    credentials: 'include' // 包含Cookie
+                });
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
