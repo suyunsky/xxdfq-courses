@@ -130,6 +130,23 @@ class LearningRecord(Base):
     duration = Column(Integer)  # 学习时长（秒）
     created_at = Column(DateTime, default=datetime.utcnow)
 
+# 试听预约线索，与课程报名和儿童学习数据分开保存
+class TrialLead(Base):
+    __tablename__ = 'trial_leads'
+
+    id = Column(Integer, primary_key=True, index=True)
+    child_age = Column(Integer, nullable=False)
+    community = Column(String(50), nullable=False)
+    phone = Column(String(20), nullable=False, index=True)
+    source_code = Column(String(80))
+    utm_source = Column(String(100))
+    utm_medium = Column(String(100))
+    utm_campaign = Column(String(150))
+    landing_path = Column(String(255))
+    status = Column(String(20), nullable=False, default='new', index=True)
+    consent_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+
 # 腾讯云点播视频模型
 class VodVideo(Base):
     __tablename__ = 'vod_videos'

@@ -5,16 +5,19 @@
 
 from fastapi import FastAPI, HTTPException, Depends, status, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
+import csv
+import io
+import re
 import uvicorn
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, text
 
 # 导入自定义模块
-from models import get_db, create_tables, User, Course, UserCourse, Lesson, Enrollment, LearningRecord
+from models import get_db, create_tables, User, Course, UserCourse, Lesson, Enrollment, LearningRecord, TrialLead
 from auth import (
     get_current_user, get_current_user_optional, authenticate_user, create_access_token,
     get_password_hash, check_video_access, generate_video_token,
@@ -141,6 +144,21 @@ class VideoAccessResponse(BaseModel):
     message: Optional[str] = None
     action: Optional[str] = None
     price: Optional[float] = None
+
+class TrialLeadCreate(BaseModel):
+    child_age: int
+    community: str
+    phone: str
+    consent: bool
+    website: Optional[str] = None
+    source_code: Optional[str] = None
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    landing_path: Optional[str] = None
+
+class TrialLeadStatusUpdate(BaseModel):
+    status: str
 
 # 初始化数据库
 @app.on_event("startup")
@@ -661,6 +679,113 @@ async def get_user_stats(
             Enrollment.payment_status == "paid"
         ).count()
     }
+
+# 试听预约线索API
+TRIAL_LEAD_STATUSES = {"new", "contacted", "booked", "visited", "enrolled", "invalid"}
+
+def serialize_trial_lead(lead: TrialLead):
+    return {
+        "id": lead.id, "child_age": lead.child_age, "community": lead.community,
+        "phone": lead.phone, "source_code": lead.source_code,
+        "utm_source": lead.utm_source, "utm_medium": lead.utm_medium,
+        "utm_campaign": lead.utm_campaign, "landing_path": lead.landing_path,
+        "status": lead.status, "consent_at": lead.consent_at, "created_at": lead.created_at
+    }
+
+def require_admin(user: User):
+    if user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="需要管理员权限")
+
+@app.post("/api/trial-leads", status_code=status.HTTP_201_CREATED)
+async def create_trial_lead(lead_data: TrialLeadCreate, db: Session = Depends(get_db)):
+    """接收最少必要信息的试听预约，不要求用户登录。"""
+    if lead_data.website:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="提交未通过验证")
+    if not lead_data.consent:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="请确认信息使用说明")
+    if lead_data.child_age < 6 or lead_data.child_age > 12:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="体验课适合6–12岁儿童")
+
+    community = lead_data.community.strip()
+    phone = re.sub(r"[\s-]", "", lead_data.phone)
+    if len(community) < 2 or len(community) > 50:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="请填写有效的社区名称")
+    if not re.fullmatch(r"(?:\+?86)?1[3-9]\d{9}", phone):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="请输入有效的中国大陆手机号")
+
+    # 防止网络抖动或重复点击在短时间内生成多条相同线索。
+    recent = db.query(TrialLead).filter(
+        TrialLead.phone == phone,
+        TrialLead.created_at >= datetime.utcnow() - timedelta(minutes=10)
+    ).order_by(TrialLead.created_at.desc()).first()
+    if recent:
+        return {"lead_id": recent.id, "status": "received", "duplicate": True}
+
+    def clean(value, limit):
+        return value.strip()[:limit] if value and value.strip() else None
+
+    lead = TrialLead(
+        child_age=lead_data.child_age, community=community, phone=phone,
+        source_code=clean(lead_data.source_code, 80), utm_source=clean(lead_data.utm_source, 100),
+        utm_medium=clean(lead_data.utm_medium, 100), utm_campaign=clean(lead_data.utm_campaign, 150),
+        landing_path=clean(lead_data.landing_path, 255), status="new", consent_at=datetime.utcnow()
+    )
+    db.add(lead)
+    db.commit()
+    db.refresh(lead)
+    return {"lead_id": lead.id, "status": "received", "duplicate": False}
+
+@app.get("/api/admin/trial-leads")
+async def list_trial_leads(
+    lead_status: Optional[str] = Query(None, alias="status"),
+    source: Optional[str] = None,
+    from_date: Optional[datetime] = None,
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_current_user_hybrid)
+):
+    require_admin(current_user)
+    query = db.query(TrialLead)
+    if lead_status:
+        if lead_status not in TRIAL_LEAD_STATUSES:
+            raise HTTPException(status_code=422, detail="无效的线索状态")
+        query = query.filter(TrialLead.status == lead_status)
+    if source:
+        query = query.filter(TrialLead.source_code == source)
+    if from_date:
+        query = query.filter(TrialLead.created_at >= from_date)
+    leads = query.order_by(TrialLead.created_at.desc()).limit(limit).all()
+    return [serialize_trial_lead(lead) for lead in leads]
+
+@app.put("/api/admin/trial-leads/{lead_id}")
+async def update_trial_lead(
+    lead_id: int, update: TrialLeadStatusUpdate, db: Session = Depends(get_db),
+    current_user: User = Depends(require_current_user_hybrid)
+):
+    require_admin(current_user)
+    if update.status not in TRIAL_LEAD_STATUSES:
+        raise HTTPException(status_code=422, detail="无效的线索状态")
+    lead = db.query(TrialLead).filter(TrialLead.id == lead_id).first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="线索不存在")
+    lead.status = update.status
+    db.commit()
+    db.refresh(lead)
+    return serialize_trial_lead(lead)
+
+@app.get("/api/admin/trial-leads/export")
+async def export_trial_leads(
+    db: Session = Depends(get_db), current_user: User = Depends(require_current_user_hybrid)
+):
+    require_admin(current_user)
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["线索编号", "创建时间", "孩子年龄", "社区", "联系电话", "状态", "来源编码", "UTM来源", "UTM媒介", "UTM活动", "入口页面", "同意时间"])
+    for lead in db.query(TrialLead).order_by(TrialLead.created_at.desc()).all():
+        writer.writerow([lead.id, lead.created_at.isoformat(), lead.child_age, lead.community, lead.phone, lead.status, lead.source_code or "", lead.utm_source or "", lead.utm_medium or "", lead.utm_campaign or "", lead.landing_path or "", lead.consent_at.isoformat()])
+    content = "\ufeff" + output.getvalue()
+    headers = {"Content-Disposition": 'attachment; filename="trial-leads.csv"'}
+    return StreamingResponse(iter([content]), media_type="text/csv; charset=utf-8", headers=headers)
 
 # 管理员API
 @app.post("/api/admin/courses", response_model=CourseResponse)

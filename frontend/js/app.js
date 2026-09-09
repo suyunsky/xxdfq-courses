@@ -2,7 +2,7 @@
 
 // 全局API配置 - 统一的后端API基础URL
 // 使用相对路径，让Nginx代理到后端服务
-window.apiBaseUrl = ''; // 使用相对路径，Nginx会将/api/代理到后端
+window.apiBaseUrl = window.location.port === '8080' ? 'http://localhost:8000' : '';
 
 console.log('API基础URL配置:', window.apiBaseUrl);
 console.log('当前部署模式: Nginx代理模式');
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
         template: `
             <div class="app">
                 <nav-bar @navigate="handleNavigate"></nav-bar>
-                <main>
+                <main class="site-main">
                     <component 
                         :is="currentPage" 
                         @navigate="handleNavigate"
@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ></component>
                 </main>
                 <footer-component></footer-component>
+                <trial-booking></trial-booking>
             </div>
         `,
         data() {
@@ -38,10 +39,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     '/courses': 'CoursesPage',
                     '/course/:id': 'CourseDetailPage',
                     '/login': 'LoginPage',
-                    '/register': 'RegisterPage',
+                    '/register': 'LoginPage',
                     '/dashboard': 'DashboardPage',
-                    '/growth-path': 'GrowthPathPage',
-                    '/about': 'AboutPage',
+                    '/growth-path': 'PhilosophyPage',
+                    '/philosophy': 'PhilosophyPage',
+                    '/about': 'PhilosophyPage',
+                    '/teacher': 'TeacherPage',
+                    '/teachers': 'TeacherPage',
                     '/gallery': 'PhotoGalleryPage',
                     '/photos': 'PhotoGalleryPage'
                 }
@@ -54,10 +58,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 'CoursesPage': window.CoursesPage || { template: '<div style="padding: 100px; text-align: center;"><h2>课程页面开发中...</h2></div>' },
                 'CourseDetailPage': window.CourseDetailPage || { template: '<div style="padding: 100px; text-align: center;"><h2>课程详情页面开发中...</h2></div>' },
                 'LoginPage': window.LoginPage || { template: '<div style="padding: 100px; text-align: center;"><h2>登录页面开发中...</h2></div>' },
-                'RegisterPage': { template: '<div style="padding: 100px; text-align: center;"><h2>注册页面开发中...</h2></div>' },
                 'DashboardPage': window.DashboardPage || { template: '<div style="padding: 100px; text-align: center;"><h2>用户中心开发中...</h2></div>' },
-                'GrowthPathPage': { template: '<div style="padding: 100px; text-align: center;"><h2>成长路径页面开发中...</h2></div>' },
-                'AboutPage': { template: '<div style="padding: 100px; text-align: center;"><h2>关于我们页面开发中...</h2></div>' },
+                'PhilosophyPage': window.PhilosophyPage,
+                'TeacherPage': window.TeacherPage,
                 'PhotoGalleryPage': window.PhotoGalleryPage || { template: '<div style="padding: 100px; text-align: center;"><h2>照片展示页面开发中...</h2></div>' }
             },
         methods: {
@@ -73,6 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 更新浏览器地址栏（不刷新页面）
                 window.history.pushState({}, '', path);
+                this.updateDocumentTitle(path);
                 
                 // 滚动到顶部
                 window.scrollTo(0, 0);
@@ -143,6 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const routeMatch = this.matchRoute(path);
                     this.currentPage = routeMatch.component;
                     this.routeParams = routeMatch.params;
+                    this.updateDocumentTitle(path);
                 });
             },
             
@@ -152,6 +157,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 const routeMatch = this.matchRoute(path);
                 this.currentPage = routeMatch.component;
                 this.routeParams = routeMatch.params;
+                this.updateDocumentTitle(path);
+            },
+            updateDocumentTitle(path) {
+                const titles = {
+                    '/': '小小达芬奇｜让孩子在艺术里找到自己的表达',
+                    '/philosophy': '教育理念｜小小达芬奇', '/about': '教育理念｜小小达芬奇',
+                    '/courses': '课程体系｜小小达芬奇', '/gallery': '成长影像｜小小达芬奇',
+                    '/teacher': '毛毛老师｜小小达芬奇', '/login': '学员登录｜小小达芬奇',
+                    '/dashboard': '学习中心｜小小达芬奇'
+                };
+                document.title = titles[path] || (path.startsWith('/course/') ? '课程详情｜小小达芬奇' : '小小达芬奇');
             }
         },
         mounted() {
@@ -161,9 +177,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // 添加全局导航事件监听
             document.addEventListener('click', (e) => {
                 // 处理内部链接点击
-                if (e.target.matches('a[href^="/"]') && !e.target.matches('a[href^="http"]')) {
+                const link = e.target.closest('a[href^="/"]');
+                if (link && !link.hasAttribute('download')) {
                     e.preventDefault();
-                    const href = e.target.getAttribute('href');
+                    const href = link.getAttribute('href');
                     this.handleNavigate(href);
                 }
             });
@@ -204,6 +221,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.PhotoGalleryPage) {
             app.component('PhotoGalleryPage', window.PhotoGalleryPage);
         }
+        if (window.PhilosophyPage) app.component('PhilosophyPage', window.PhilosophyPage);
+        if (window.TeacherPage) app.component('TeacherPage', window.TeacherPage);
+        if (window.TrialBooking) app.component('TrialBooking', window.TrialBooking);
         
         app.mount('#app');
         console.log('小小达芬奇艺术教育平台已启动');

@@ -1,79 +1,28 @@
-// 页脚组件
 window.Footer = {
     template: `
-        <footer class="art-footer">
-            <div class="art-footer-container">
-                <div class="art-footer-content">
-                    <!-- 品牌信息 -->
-                    <div class="art-footer-section">
-                        <h3 class="art-footer-section-title">小小达芬奇</h3>
-                        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-md);">
-                            看见自己 · 从艺术开始
-                        </p>
-                        <p style="font-size: 0.875rem; color: var(--color-text-muted);">
-                            以创造性艺术教育，培养孩子的观察力、创造力与自我意识
-                        </p>
-                    </div>
-                    
-                    <!-- 快速链接 -->
-                    <div class="art-footer-section">
-                        <h3 class="art-footer-section-title">快速链接</h3>
-                        <ul class="art-footer-links">
-                            <li><a href="/" class="art-footer-link">首页</a></li>
-                            <li><a href="/courses" class="art-footer-link">在线课程</a></li>
-                            <li><a href="/growth-path" class="art-footer-link">成长路径</a></li>
-                            <li><a href="/teachers" class="art-footer-link">教师团队</a></li>
-                        </ul>
-                    </div>
-                    
-                    <!-- 联系方式 -->
-                    <div class="art-footer-section">
-                        <h3 class="art-footer-section-title">联系我们</h3>
-                        <ul class="art-footer-links">
-                            <li><a href="mailto:contact@xxdfq.com" class="art-footer-link">
-                                <i class="fas fa-envelope" style="margin-right: 8px;"></i>
-                                contact@xxdfq.com
-                            </a></li>
-                            <li><a href="tel:+8610000000000" class="art-footer-link">
-                                <i class="fas fa-phone" style="margin-right: 8px;"></i>
-                                +86 100 0000 0000
-                            </a></li>
-                            <li class="art-footer-link">
-                                <i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
-                                北京市朝阳区艺术教育中心
-                            </li>
-                        </ul>
-                    </div>
-                    
-                    <!-- 社交媒体 -->
-                    <div class="art-footer-section">
-                        <h3 class="art-footer-section-title">关注我们</h3>
-                        <div style="display: flex; gap: var(--space-md); margin-top: var(--space-md);">
-                            <a href="#" class="art-btn" style="padding: var(--space-sm);">
-                                <i class="fab fa-weixin"></i>
-                            </a>
-                            <a href="#" class="art-btn" style="padding: var(--space-sm);">
-                                <i class="fab fa-weibo"></i>
-                            </a>
-                            <a href="#" class="art-btn" style="padding: var(--space-sm);">
-                                <i class="fab fa-douban"></i>
-                            </a>
-                        </div>
-                    </div>
+        <footer class="site-footer">
+            <div class="site-shell site-footer__main">
+                <div class="site-footer__brand">
+                    <a href="/" class="wordmark">小小达芬奇</a>
+                    <p class="site-footer__statement">让孩子在真实的创作中，慢慢找到自己的表达。</p>
                 </div>
-                
-                <!-- 底部版权 -->
-                <div class="art-footer-bottom">
-                    <p>© 2024 小小达芬奇艺术教育平台. 保留所有权利.</p>
-                    <p style="margin-top: var(--space-sm);">
-                        <a href="/privacy" class="art-footer-link" style="font-size: 0.875rem;">隐私政策</a>
-                        · 
-                        <a href="/terms" class="art-footer-link" style="font-size: 0.875rem;">服务条款</a>
-                    </p>
+                <nav class="site-footer__links" aria-label="页脚导航">
+                    <a href="/philosophy">教育理念</a><a href="/courses">课程体系</a>
+                    <a href="/gallery">成长影像</a><a href="/teacher">毛毛老师</a>
+                    <a href="/login">学习中心</a><button class="text-link" style="border-width:0 0 1px;background:transparent;padding:0;width:max-content;cursor:pointer" @click="openBooking">预约体验</button>
+                </nav>
+                <div class="site-footer__contact">
+                    <p>北京昌平区</p>
+                    <p>回龙观龙泽东附近</p>
+                    <p>详细地址请预约后咨询</p>
                 </div>
             </div>
+            <div class="site-shell site-footer__bottom">
+                <span>© {{ year }} 小小达芬奇儿童艺术教育</span>
+                <span>艺术打开表达，也陪孩子慢慢长大</span>
+            </div>
         </footer>
-    `
+    `,
+    computed: { year() { return new Date().getFullYear(); } },
+    methods: { openBooking() { window.dispatchEvent(new CustomEvent('open-booking', { detail: { source: 'footer' } })); } }
 };
-
-console.log('页脚组件已加载');

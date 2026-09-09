@@ -1,219 +1,107 @@
-// 首页组件 - 艺术氛围设计
 window.HomePage = {
     template: `
         <div class="home-page">
-            <!-- Hero区域 -->
-            <section class="art-hero art-fade-in">
-                <div class="art-hero-content">
-                    <h1 class="art-hero-title">看见自己 · 从艺术开始</h1>
-                    <p class="art-hero-subtitle">
-                        以创造性艺术教育，培养孩子的观察力、创造力与自我意识
-                    </p>
-                    <div class="art-hero-actions">
-                        <button class="art-btn art-btn-primary" @click="goToCourses">
-                            <i class="fas fa-book-open"></i>
-                            <span>了解课程体系</span>
+            <section class="home-hero">
+                <div class="home-hero__copy">
+                    <h1 class="home-hero__title">让孩子在艺术里，<br>找到自己的表达</h1>
+                    <p class="home-hero__lead">不教标准答案。用自主创作，看见孩子如何选择、思考与成长。</p>
+                    <div class="home-hero__actions">
+                        <button class="brand-button brand-button--primary" @click="openBooking('home-hero')">预约艺术体验
+                            <svg class="button-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
                         </button>
-                        <button class="art-btn art-btn-outline" @click="watchDemo">
-                            <i class="fas fa-play-circle"></i>
-                            <span>观看课程示例</span>
-                        </button>
+                        <a href="/gallery" class="brand-button brand-button--quiet">看看真实课堂</a>
                     </div>
+                    <div class="home-hero__location">回龙观龙泽东附近 · 适合 6–12 岁</div>
                 </div>
-                
-                <!-- 艺术装饰元素 -->
-                <div class="art-element" style="top: 20%; left: 10%;">
-                    <div class="art-element-circle art-float"></div>
-                </div>
-                <div class="art-element" style="top: 60%; right: 15%;">
-                    <div class="art-element-line" style="width: 100px;"></div>
+                <div class="home-hero__media">
+                    <picture><source srcset="/assets/images/web/refined/growth-elephants-refined-640.webp 640w, /assets/images/web/refined/growth-elephants-refined-960.webp 960w, /assets/images/web/refined/growth-elephants-refined-1440.webp 1440w" type="image/webp"><img src="/assets/images/refined/growth-elephants-refined.png" alt="孩子们在明亮的艺术教室开心展示各自创作的小象作品"></picture>
                 </div>
             </section>
-            
-            <!-- 艺术分隔线 -->
-            <div class="art-divider"></div>
-            
-            <!-- 我们在做什么 -->
-            <section class="art-values">
-                <div class="art-values-container">
-                    <h2 class="art-values-title">我们在做什么</h2>
-                    <div class="art-values-grid">
-                        <div class="art-value-card art-card art-shadow">
-                            <div class="art-value-icon">
-                                <i class="fas fa-paint-brush"></i>
-                            </div>
-                            <h3 class="art-value-title">创造性艺术教育</h3>
-                            <p class="art-value-description">
-                                通过艺术激发创造力，培养独立思考和表达能力
-                            </p>
-                        </div>
-                        
-                        <div class="art-value-card art-card art-shadow">
-                            <div class="art-value-icon">
-                                <i class="fas fa-eye"></i>
-                            </div>
-                            <h3 class="art-value-title">观察力与表达力培养</h3>
-                            <p class="art-value-description">
-                                学习观察世界，用艺术语言表达内心感受
-                            </p>
-                        </div>
-                        
-                        <div class="art-value-card art-card art-shadow">
-                            <div class="art-value-icon">
-                                <i class="fas fa-brain"></i>
-                            </div>
-                            <h3 class="art-value-title">艺术中的元认知觉察</h3>
-                            <p class="art-value-description">
-                                在创作过程中认识自我，培养反思和成长意识
-                            </p>
-                        </div>
+
+            <section class="section section--quiet" id="beliefs">
+                <div class="site-shell">
+                    <div class="beliefs__head reveal">
+                        <div><span class="section-number">01</span><h2 class="section-title">我们关注的，<br>不只是画得像不像</h2></div>
+                        <p class="section-intro">艺术不是技巧的复制，而是一种看见世界的方式。每个孩子都有独特的感受、想法和表达，我们陪他们从等待答案，走向主动探索。</p>
+                    </div>
+                    <div class="beliefs__grid reveal">
+                        <article class="belief"><h3>表达</h3><p>用自己的方式，说出所见、所想和内心感受。</p></article>
+                        <article class="belief"><h3>思考</h3><p>在选择与尝试中不断提问，找到属于自己的答案。</p></article>
+                        <article class="belief"><h3>学习</h3><p>从经验中总结，在挑战中调整，持续成长。</p></article>
                     </div>
                 </div>
             </section>
-            
-            <!-- 艺术成长四阶段 -->
-            <section class="art-stages">
-                <div class="art-stages-container">
-                    <h2 class="art-stages-title">艺术成长四阶段</h2>
-                    <div class="art-stages-timeline">
-                        <!-- 阶段1 -->
-                        <div class="art-stage-item">
-                            <div class="art-stage-marker"></div>
-                            <div class="art-stage-content art-card art-shadow">
-                                <div class="art-stage-number">第一阶段</div>
-                                <h3 class="art-stage-name">唤醒感知</h3>
-                                <p class="art-stage-description">
-                                    通过色彩、形状、质感的探索，唤醒对艺术的敏感度和兴趣
-                                </p>
-                                <button class="art-btn" style="margin-top: var(--space-md);" @click="viewStage(1)">
-                                    了解更多
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- 阶段2 -->
-                        <div class="art-stage-item">
-                            <div class="art-stage-marker"></div>
-                            <div class="art-stage-content art-card art-shadow">
-                                <div class="art-stage-number">第二阶段</div>
-                                <h3 class="art-stage-name">自由表达</h3>
-                                <p class="art-stage-description">
-                                    鼓励自由创作，建立自信，发展个人表达风格
-                                </p>
-                                <button class="art-btn" style="margin-top: var(--space-md);" @click="viewStage(2)">
-                                    了解更多
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- 阶段3 -->
-                        <div class="art-stage-item">
-                            <div class="art-stage-marker"></div>
-                            <div class="art-stage-content art-card art-shadow">
-                                <div class="art-stage-number">第三阶段</div>
-                                <h3 class="art-stage-name">结构理解</h3>
-                                <p class="art-stage-description">
-                                    学习艺术原理和技巧，理解构图、色彩、光影的关系
-                                </p>
-                                <button class="art-btn" style="margin-top: var(--space-md);" @click="viewStage(3)">
-                                    了解更多
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- 阶段4 -->
-                        <div class="art-stage-item">
-                            <div class="art-stage-marker"></div>
-                            <div class="art-stage-content art-card art-shadow">
-                                <div class="art-stage-number">第四阶段</div>
-                                <h3 class="art-stage-name">自我风格</h3>
-                                <p class="art-stage-description">
-                                    形成个人艺术语言，能够独立创作有深度的作品
-                                </p>
-                                <button class="art-btn" style="margin-top: var(--space-md);" @click="viewStage(4)">
-                                    了解更多
-                                </button>
-                            </div>
-                        </div>
+
+            <section class="section">
+                <div class="site-shell">
+                    <div class="journey__head reveal">
+                        <div><span class="section-number">02</span><h2 class="section-title">一堂课，<br>孩子经历什么</h2></div>
+                        <p>我们设计的每一堂课，都是一次完整的创作旅程。孩子在真实的材料与情境中，经历从感知到回望的过程。</p>
+                    </div>
+                    <div class="journey__track reveal">
+                        <article class="journey-step"><span class="journey-step__num">01</span><h3>感知</h3><p>观察生活，触摸材料，唤醒自己的兴趣与想法。</p></article>
+                        <article class="journey-step"><span class="journey-step__num">02</span><h3>选择</h3><p>自己决定主题、材料与表达方式，开始创作。</p></article>
+                        <article class="journey-step"><span class="journey-step__num">03</span><h3>尝试</h3><p>遇到困难不急着找答案，而是换一种方法继续探索。</p></article>
+                        <article class="journey-step"><span class="journey-step__num">04</span><h3>回望</h3><p>看见自己走过的过程，表达感受，也积累经验。</p></article>
                     </div>
                 </div>
             </section>
-            
-            <!-- 适合人群 -->
-            <section class="art-audience">
-                <div class="art-audience-container">
-                    <h2 class="art-audience-title">谁适合小小达芬奇</h2>
-                    <div class="art-audience-tags">
-                        <div class="art-audience-tag">情绪细腻的孩子</div>
-                        <div class="art-audience-tag">有想法但容易卡住</div>
-                        <div class="art-audience-tag">希望长期培养创造力</div>
-                        <div class="art-audience-tag">对艺术有天然兴趣</div>
-                        <div class="art-audience-tag">需要表达出口</div>
-                        <div class="art-audience-tag">寻求个性化成长</div>
+
+            <section class="section section--quiet">
+                <div class="site-shell">
+                    <div class="growth-gallery__header reveal">
+                        <div><span class="section-number">03</span><h2 class="section-title">真实发生的成长</h2></div>
+                        <p>每一幅作品、每一个专注的瞬间，都是孩子真实表达与成长的痕迹。</p>
+                    </div>
+                    <div class="growth-gallery__grid reveal">
+                        <a href="/gallery" class="growth-gallery__item"><img src="/assets/images/web/refined/growth-focus-refined-960.webp" srcset="/assets/images/web/refined/growth-focus-refined-640.webp 640w, /assets/images/web/refined/growth-focus-refined-960.webp 960w" alt="孩子在整洁明亮的艺术教室专注为陶艺作品上色" loading="lazy"></a>
+                        <a href="/gallery" class="growth-gallery__item"><img src="/assets/images/web/refined/growth-roosters-refined-960.webp" srcset="/assets/images/web/refined/growth-roosters-refined-640.webp 640w, /assets/images/web/refined/growth-roosters-refined-960.webp 960w" alt="孩子们开心展示各自创作的公鸡作品" loading="lazy"></a>
+                        <a href="/gallery" class="growth-gallery__item"><img src="/assets/images/web/refined/pottery-clean-v2-960.webp" srcset="/assets/images/web/refined/pottery-clean-v2-640.webp 640w, /assets/images/web/refined/pottery-clean-v2-960.webp 960w" alt="孩子们在整洁的艺术教室体验陶艺拉坯" loading="lazy"></a>
+                        <a href="/gallery" class="growth-gallery__item"><img src="/assets/images/web/refined/growth-archive-refined-960.webp" srcset="/assets/images/web/refined/growth-archive-refined-640.webp 640w, /assets/images/web/refined/growth-archive-refined-960.webp 960w" alt="儿童作品与创作成长影像" loading="lazy"></a>
                     </div>
                 </div>
             </section>
-            
-            <!-- 召唤行动 -->
-            <section style="padding: var(--space-3xl) var(--space-lg); text-align: center;">
-                <div style="max-width: 600px; margin: 0 auto;">
-                    <h2 style="margin-bottom: var(--space-lg);">开启艺术成长之旅</h2>
-                    <p style="color: var(--color-text-secondary); margin-bottom: var(--space-2xl);">
-                        加入小小达芬奇，让孩子在艺术中发现自我，在创作中成长
-                    </p>
-                    <div style="display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap;">
-                        <button class="art-btn art-btn-primary" @click="goToRegister">
-                            <i class="fas fa-user-plus"></i>
-                            <span>立即注册</span>
-                        </button>
-                        <button class="art-btn art-btn-outline" @click="contactUs">
-                            <i class="fas fa-comments"></i>
-                            <span>咨询课程顾问</span>
+
+            <section class="section">
+                <div class="site-shell teacher-preview reveal">
+                    <div class="teacher-preview__image"><img src="/assets/images/web/refined/teacher-class-refined-960.webp" srcset="/assets/images/web/refined/teacher-class-refined-640.webp 640w, /assets/images/web/refined/teacher-class-refined-960.webp 960w, /assets/images/web/refined/teacher-class-refined-1440.webp 1440w" alt="毛毛老师在明亮的艺术教室与家长分享儿童艺术教育" loading="lazy"></div>
+                    <div class="teacher-preview__copy">
+                        <span class="section-number">04 · MAOMAO</span>
+                        <h2>毛毛老师</h2>
+                        <h3>15 年专注儿童艺术教育</h3>
+                        <p>我想看见孩子从犹豫到坚定、从模仿到创造的过程。心理学训练让我更关注孩子在创作中的选择、困难与表达，但一幅画不会被用来定义孩子。</p>
+                        <a href="/teacher" class="text-link">认识毛毛老师
+                            <svg class="button-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section section--quiet">
+                <div class="site-shell experience-cta reveal">
+                    <div>
+                        <span class="section-number">05 · 适合 6–12 岁｜回龙观龙泽东附近</span>
+                        <h2>预约一次没有标准答案的艺术体验</h2>
+                        <p>走进真实的艺术课堂，让孩子在感知、思考与表达中，遇见更大的自己。</p>
+                        <button class="brand-button brand-button--primary" @click="openBooking('home-final')">预约艺术体验
+                            <svg class="button-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
                         </button>
                     </div>
+                    <aside class="experience-cta__aside"><h3>微信咨询</h3><p>正式企业微信二维码配置后，可扫码了解课程与体验安排。</p><div class="qr-placeholder">企业微信二维码<br>上线前配置</div></aside>
                 </div>
             </section>
         </div>
     `,
+    mounted() { this.setupReveals(); },
     methods: {
-        goToCourses() {
-            this.$emit('navigate', '/courses');
-        },
-        watchDemo() {
-            alert('课程示例视频将在新窗口打开');
-            // 实际项目中这里会打开视频播放器
-        },
-        viewStage(stageNumber) {
-            this.$emit('navigate', `/growth-path#stage-${stageNumber}`);
-        },
-        goToRegister() {
-            this.$emit('navigate', '/register');
-        },
-        contactUs() {
-            alert('请联系课程顾问：contact@xxdfq.com');
-        }
-    },
-    mounted() {
-        // 添加滚动动画效果
-        this.setupScrollAnimations();
-    },
-    methods: {
-        setupScrollAnimations() {
-            // 简单的滚动动画效果
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('art-fade-in');
-                    }
-                });
-            }, { threshold: 0.1 });
-            
-            // 观察所有卡片
-            document.querySelectorAll('.art-card').forEach(card => {
-                observer.observe(card);
-            });
+        openBooking(source) { window.dispatchEvent(new CustomEvent('open-booking', { detail: { source } })); },
+        setupReveals() {
+            const els = this.$el.querySelectorAll('.reveal');
+            if (!('IntersectionObserver' in window)) return els.forEach(el => el.classList.add('is-visible'));
+            const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+                if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
+            }), { threshold: .12 });
+            els.forEach(el => observer.observe(el));
         }
     }
 };
-
-console.log('首页组件已加载');

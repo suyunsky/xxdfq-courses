@@ -161,6 +161,30 @@ window.DashboardPage = {
                 </div>
             </section>
             
+            <!-- 管理员试听线索 -->
+            <section v-if="currentUser && currentUser.role === 'admin'" style="padding: var(--space-3xl) var(--space-lg); background: var(--surface); border-top: 1px solid var(--line);">
+                <div style="max-width: 1200px; margin: 0 auto;">
+                    <div style="display:flex;justify-content:space-between;gap:24px;align-items:end;flex-wrap:wrap">
+                        <div><span class="section-number">ADMIN</span><h2 style="margin-top:12px">试听线索</h2></div>
+                        <button class="brand-button" @click="exportLeads">导出 CSV</button>
+                    </div>
+                    <div v-if="leadsError" class="form-status form-status--error">{{ leadsError }}</div>
+                    <div class="lead-admin">
+                        <table class="lead-table">
+                            <thead><tr><th>时间</th><th>年龄</th><th>社区</th><th>联系电话</th><th>来源</th><th>状态</th></tr></thead>
+                            <tbody>
+                                <tr v-if="leadsLoading"><td colspan="6">正在加载试听线索…</td></tr>
+                                <tr v-else-if="trialLeads.length === 0"><td colspan="6">暂无试听线索</td></tr>
+                                <tr v-for="lead in trialLeads" :key="lead.id">
+                                    <td>{{ formatDate(lead.created_at) }}</td><td>{{ lead.child_age }} 岁</td><td>{{ lead.community }}</td><td>{{ lead.phone }}</td><td>{{ lead.source_code || '官网' }}</td>
+                                    <td><select :value="lead.status" @change="updateLeadStatus(lead, $event.target.value)"><option v-for="item in leadStatuses" :key="item.value" :value="item.value">{{ item.label }}</option></select></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <!-- 学习统计 -->
             <section style="padding: var(--space-3xl) var(--space-lg);">
                 <div style="max-width: 1200px; margin: 0 auto;">
@@ -228,6 +252,15 @@ window.DashboardPage = {
     data() {
         return {
             activeTab: 'ongoing',
+            currentUser: null,
+            trialLeads: [],
+            leadsLoading: false,
+            leadsError: '',
+            leadStatuses: [
+                { value: 'new', label: '新线索' }, { value: 'contacted', label: '已联系' },
+                { value: 'booked', label: '已预约' }, { value: 'visited', label: '已到店' },
+                { value: 'enrolled', label: '已报名' }, { value: 'invalid', label: '无效' }
+            ],
             userStats: {
                 total_courses: 0,
                 completed_courses: 0,
@@ -289,6 +322,9 @@ window.DashboardPage = {
             try {
                 // 使用全局apiBaseUrl
                 const apiBaseUrl = window.apiBaseUrl || '';
+                const meResponse = await fetch(apiBaseUrl + '/api/auth/web/me', { credentials: 'include' });
+                if (!meResponse.ok) throw new Error(`认证失败: ${meResponse.status}`);
+                this.currentUser = await meResponse.json();
                 
                 // 加载用户统计 - 使用Cookie认证（credentials: 'include'）
                 const statsResponse = await fetch(apiBaseUrl + '/api/user/stats', {
@@ -320,6 +356,7 @@ window.DashboardPage = {
                 }
                 
                 this.allCourses = await allCoursesResponse.json();
+                if (this.currentUser.role === 'admin') await this.loadTrialLeads();
                 
                 console.log('用户数据加载成功:', {
                     stats: this.userStats,
@@ -354,7 +391,25 @@ window.DashboardPage = {
         
         goToCourses() {
             this.$emit('navigate', '/courses');
-        }
+        },
+        async loadTrialLeads() {
+            this.leadsLoading = true; this.leadsError = '';
+            try {
+                const response = await fetch((window.apiBaseUrl || '') + '/api/admin/trial-leads', { credentials: 'include' });
+                if (!response.ok) throw new Error('试听线索加载失败');
+                this.trialLeads = await response.json();
+            } catch (error) { this.leadsError = error.message; }
+            finally { this.leadsLoading = false; }
+        },
+        async updateLeadStatus(lead, status) {
+            const previous = lead.status; lead.status = status;
+            try {
+                const response = await fetch((window.apiBaseUrl || '') + `/api/admin/trial-leads/${lead.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ status }) });
+                if (!response.ok) throw new Error('状态更新失败');
+            } catch (error) { lead.status = previous; this.leadsError = error.message; }
+        },
+        exportLeads() { window.location.assign((window.apiBaseUrl || '') + '/api/admin/trial-leads/export'); },
+        formatDate(value) { return value ? new Date(value).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—'; }
     }
 };
 

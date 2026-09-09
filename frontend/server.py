@@ -28,7 +28,7 @@ class SPAServer(http.server.SimpleHTTPRequestHandler):
             return
         
         # 检查是否是静态文件请求
-        if path.startswith('/css/') or path.startswith('/js/') or path.startswith('/assets/') or path.startswith('/data/'):
+        if path.startswith('/css/') or path.startswith('/js/') or path.startswith('/assets/') or path.startswith('/data/') or path.startswith('/fonts/'):
             # 检查文件是否存在
             file_path = os.path.join(FRONTEND_DIR, path[1:])  # 去掉开头的'/'
             if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -213,7 +213,11 @@ def main():
     """启动服务器"""
     os.chdir(FRONTEND_DIR)  # 切换到前端目录
     
-    with socketserver.TCPServer(("", PORT), SPAServer) as httpd:
+    # 页面会同时请求字体、响应式图片和脚本。线程化服务器可避免某个
+    # 浏览器连接占住唯一请求槽，导致其他资源或刷新请求超时。
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
+    socketserver.ThreadingTCPServer.daemon_threads = True
+    with socketserver.ThreadingTCPServer(("", PORT), SPAServer) as httpd:
         print(f"SPA HTTP服务器启动在 http://localhost:{PORT}")
         print(f"前端目录: {FRONTEND_DIR}")
         print("按 Ctrl+C 停止服务器")
