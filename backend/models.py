@@ -3,11 +3,15 @@
 使用SQLAlchemy ORM
 """
 
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, ForeignKey, Text, Float
+from sqlalchemy import (
+    create_engine, Column, Integer, String, Boolean, DateTime, Date,
+    ForeignKey, Text, Float, CheckConstraint, UniqueConstraint, inspect, text
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from datetime import datetime
 import os
+import re
 from dotenv import load_dotenv
 
 # 加载环境变量
@@ -22,13 +26,14 @@ class User(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
-    email = Column(String(100), unique=True, index=True, nullable=False)
+    email = Column(String(100), unique=True, index=True, nullable=True)
     password_hash = Column(String(255), nullable=False)
     full_name = Column(String(100))
     role = Column(String(20), default='student')  # student, teacher, admin
     avatar_url = Column(String(255))
     bio = Column(Text)
     is_active = Column(Boolean, default=True)
+    must_change_password = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -147,6 +152,84 @@ class TrialLead(Base):
     consent_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
 
+
+# 线下学员档案：登录账号仍沿用 users，业务信息独立保存。
+class StudentProfile(Base):
+    __tablename__ = 'student_profiles'
+    __table_args__ = (
+        CheckConstraint("status IN ('active', 'paused')", name='ck_student_profile_status'),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, unique=True, index=True)
+    guardian_phone = Column(String(20), nullable=False, index=True)
+    birth_date = Column(Date, nullable=False)
+    status = Column(String(20), nullable=False, default='active', index=True)
+    notes = Column(Text)
+    created_by_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship('User', foreign_keys=[user_id])
+    created_by = relationship('User', foreign_keys=[created_by_user_id])
+    hour_account = relationship(
+        'LessonHourAccount', back_populates='student_profile', uselist=False,
+        cascade='all, delete-orphan'
+    )
+
+
+# 每名学员一个总课时账户；余额是流水提交后的事务内快照。
+class LessonHourAccount(Base):
+    __tablename__ = 'lesson_hour_accounts'
+    __table_args__ = (CheckConstraint('balance >= 0', name='ck_lesson_hour_balance_nonnegative'),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_profile_id = Column(
+        Integer, ForeignKey('student_profiles.id', ondelete='CASCADE'),
+        nullable=False, unique=True, index=True
+    )
+    balance = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    student_profile = relationship('StudentProfile', back_populates='hour_account')
+    transactions = relationship('LessonHourTransaction', back_populates='account')
+
+
+# 课时流水只追加不修改；纠错通过 reversal_of_id 关联冲正记录。
+class LessonHourTransaction(Base):
+    __tablename__ = 'lesson_hour_transactions'
+    __table_args__ = (
+        CheckConstraint(
+            "transaction_type IN ('add', 'consume', 'reversal')",
+            name='ck_lesson_hour_transaction_type',
+        ),
+        CheckConstraint('quantity_delta <> 0', name='ck_lesson_hour_delta_nonzero'),
+        CheckConstraint('balance_after >= 0', name='ck_lesson_hour_after_nonnegative'),
+        UniqueConstraint('reversal_of_id', name='uq_lesson_hour_reversal_once'),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey('lesson_hour_accounts.id', ondelete='CASCADE'), nullable=False, index=True)
+    transaction_type = Column(String(20), nullable=False, index=True)
+    quantity_delta = Column(Integer, nullable=False)
+    balance_after = Column(Integer, nullable=False)
+    occurred_on = Column(Date, nullable=False)
+    reason = Column(String(200), nullable=False)
+    note = Column(Text)
+    operator_user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
+    reversal_of_id = Column(
+        Integer,
+        ForeignKey('lesson_hour_transactions.id', ondelete='SET NULL'),
+        nullable=True,
+    )
+    idempotency_key = Column(String(64), nullable=False, unique=True, index=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+
+    account = relationship('LessonHourAccount', back_populates='transactions')
+    operator = relationship('User', foreign_keys=[operator_user_id])
+    reversal_of = relationship('LessonHourTransaction', remote_side=[id], foreign_keys=[reversal_of_id])
+
 # 腾讯云点播视频模型
 class VodVideo(Base):
     __tablename__ = 'vod_videos'
@@ -256,6 +339,74 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # 创建所有表
 def create_tables():
     Base.metadata.create_all(bind=engine)
+
+
+def migrate_existing_schema():
+    """为现有 MySQL 数据库补充 create_all 无法追加的列与约束。"""
+    inspector = inspect(engine)
+    if 'users' not in inspector.get_table_names():
+        return
+
+    columns = {column['name']: column for column in inspector.get_columns('users')}
+    dialect = engine.dialect.name
+    with engine.begin() as connection:
+        if 'must_change_password' not in columns:
+            if dialect == 'mysql':
+                connection.execute(text(
+                    'ALTER TABLE users ADD COLUMN must_change_password '
+                    'BOOLEAN NOT NULL DEFAULT FALSE AFTER is_active'
+                ))
+            else:
+                connection.execute(text(
+                    'ALTER TABLE users ADD COLUMN must_change_password BOOLEAN NOT NULL DEFAULT 0'
+                ))
+
+        # 后台创建的儿童账号可不填写邮箱；公开注册仍由接口要求邮箱。
+        email_column = columns.get('email')
+        if dialect == 'mysql' and email_column and not email_column.get('nullable', True):
+            connection.execute(text('ALTER TABLE users MODIFY COLUMN email VARCHAR(100) NULL'))
+
+        # 早期建表版本的冲正自关联没有删除策略，账户级联清理会被 MySQL 阻止。
+        if dialect == 'mysql' and 'lesson_hour_transactions' in inspector.get_table_names():
+            for foreign_key in inspector.get_foreign_keys('lesson_hour_transactions'):
+                if foreign_key.get('constrained_columns') != ['reversal_of_id']:
+                    continue
+                ondelete = (foreign_key.get('options') or {}).get('ondelete', '').upper()
+                if ondelete == 'SET NULL':
+                    continue
+                constraint_name = foreign_key.get('name')
+                if constraint_name and re.fullmatch(r'[A-Za-z0-9_]+', constraint_name):
+                    connection.execute(text(
+                        f'ALTER TABLE lesson_hour_transactions DROP FOREIGN KEY `{constraint_name}`'
+                    ))
+                    connection.execute(text(
+                        'ALTER TABLE lesson_hour_transactions ADD CONSTRAINT '
+                        'fk_lesson_hour_transactions_reversal_of '
+                        'FOREIGN KEY (reversal_of_id) REFERENCES lesson_hour_transactions(id) '
+                        'ON DELETE SET NULL'
+                    ))
+
+            transaction_checks = {
+                constraint['name']
+                for constraint in inspector.get_check_constraints('lesson_hour_transactions')
+            }
+            if 'ck_lesson_hour_transaction_type' not in transaction_checks:
+                connection.execute(text(
+                    "ALTER TABLE lesson_hour_transactions ADD CONSTRAINT "
+                    "ck_lesson_hour_transaction_type CHECK "
+                    "(transaction_type IN ('add', 'consume', 'reversal'))"
+                ))
+
+        if dialect == 'mysql' and 'student_profiles' in inspector.get_table_names():
+            profile_checks = {
+                constraint['name']
+                for constraint in inspector.get_check_constraints('student_profiles')
+            }
+            if 'ck_student_profile_status' not in profile_checks:
+                connection.execute(text(
+                    "ALTER TABLE student_profiles ADD CONSTRAINT "
+                    "ck_student_profile_status CHECK (status IN ('active', 'paused'))"
+                ))
 
 # 获取数据库会话
 def get_db():

@@ -17,13 +17,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, text
 
 # 导入自定义模块
-from models import get_db, create_tables, User, Course, UserCourse, Lesson, Enrollment, LearningRecord, TrialLead
+from models import get_db, create_tables, migrate_existing_schema, User, Course, UserCourse, Lesson, Enrollment, LearningRecord, TrialLead
 from auth import (
     get_current_user, get_current_user_optional, authenticate_user, create_access_token,
     get_password_hash, check_video_access, generate_video_token,
     security
 )
 from vod_api import router as vod_router
+from student_admin import router as student_admin_router
 from dependencies import (
     get_session_manager, get_cookie_manager,
     get_current_user_from_session, get_current_user_from_session_optional,
@@ -66,11 +67,12 @@ class UserLogin(BaseModel):
 class UserResponse(BaseModel):
     id: int
     username: str
-    email: str
+    email: Optional[str] = None
     full_name: Optional[str] = None
     role: str
     avatar_url: Optional[str] = None
     bio: Optional[str] = None
+    must_change_password: bool = False
     created_at: datetime
 
 class Token(BaseModel):
@@ -165,10 +167,12 @@ class TrialLeadStatusUpdate(BaseModel):
 def startup_event():
     """应用启动时创建数据库表"""
     create_tables()
+    migrate_existing_schema()
     print("数据库表已创建")
 
 # 注册腾讯云点播API路由
 app.include_router(vod_router)
+app.include_router(student_admin_router)
 
 # API路由
 @app.get("/")
@@ -239,6 +243,7 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
         role=new_user.role,
         avatar_url=new_user.avatar_url,
         bio=new_user.bio,
+        must_change_password=new_user.must_change_password,
         created_at=new_user.created_at
     )
     
@@ -272,6 +277,7 @@ async def login(login_data: UserLogin, db: Session = Depends(get_db)):
         role=user.role,
         avatar_url=user.avatar_url,
         bio=user.bio,
+        must_change_password=user.must_change_password,
         created_at=user.created_at
     )
     
@@ -292,6 +298,7 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         role=current_user.role,
         avatar_url=current_user.avatar_url,
         bio=current_user.bio,
+        must_change_password=current_user.must_change_password,
         created_at=current_user.created_at
     )
 
@@ -962,6 +969,7 @@ async def web_login(
             "role": user.role,
             "avatar_url": user.avatar_url,
             "bio": user.bio,
+            "must_change_password": user.must_change_password,
             "created_at": user.created_at.isoformat() if user.created_at else None
         }
     })
@@ -1055,6 +1063,7 @@ async def get_web_current_user(
         role=current_user.role,
         avatar_url=current_user.avatar_url,
         bio=current_user.bio,
+        must_change_password=current_user.must_change_password,
         created_at=current_user.created_at
     )
 
@@ -1075,6 +1084,7 @@ async def get_hybrid_current_user(
         role=current_user.role,
         avatar_url=current_user.avatar_url,
         bio=current_user.bio,
+        must_change_password=current_user.must_change_password,
         created_at=current_user.created_at
     )
 

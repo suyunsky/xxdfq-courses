@@ -18,16 +18,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const App = {
         template: `
             <div class="app">
-                <nav-bar @navigate="handleNavigate"></nav-bar>
-                <main class="site-main">
+                <nav-bar v-if="!isAdminRoute" @navigate="handleNavigate"></nav-bar>
+                <main :class="isAdminRoute ? 'admin-main' : 'site-main'">
                     <component 
                         :is="currentPage" 
                         @navigate="handleNavigate"
                         :routeParams="routeParams"
                     ></component>
                 </main>
-                <footer-component></footer-component>
-                <trial-booking></trial-booking>
+                <footer-component v-if="!isAdminRoute"></footer-component>
+                <trial-booking v-if="!isAdminRoute"></trial-booking>
             </div>
         `,
         data() {
@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     '/login': 'LoginPage',
                     '/register': 'LoginPage',
                     '/dashboard': 'DashboardPage',
+                    '/change-password': 'ChangePasswordPage',
+                    '/admin/students': 'AdminStudentsPage',
                     '/growth-path': 'PhilosophyPage',
                     '/philosophy': 'PhilosophyPage',
                     '/about': 'PhilosophyPage',
@@ -63,6 +65,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 'TeacherPage': window.TeacherPage,
                 'PhotoGalleryPage': window.PhotoGalleryPage || { template: '<div style="padding: 100px; text-align: center;"><h2>照片展示页面开发中...</h2></div>' }
             },
+        computed: {
+            isAdminRoute() {
+                return this.currentPage === 'AdminStudentsPage';
+            }
+        },
         methods: {
             handleNavigate(path) {
                 console.log('导航到:', path);
@@ -165,7 +172,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     '/philosophy': '教育理念｜小小达芬奇', '/about': '教育理念｜小小达芬奇',
                     '/courses': '课程体系｜小小达芬奇', '/gallery': '成长影像｜小小达芬奇',
                     '/teacher': '毛毛老师｜小小达芬奇', '/login': '学员登录｜小小达芬奇',
-                    '/dashboard': '学习中心｜小小达芬奇'
+                    '/dashboard': '学习中心｜小小达芬奇',
+                    '/change-password': '修改密码｜小小达芬奇',
+                    '/admin/students': '学员管理｜小小达芬奇后台'
                 };
                 document.title = titles[path] || (path.startsWith('/course/') ? '课程详情｜小小达芬奇' : '小小达芬奇');
             }
@@ -224,6 +233,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.PhilosophyPage) app.component('PhilosophyPage', window.PhilosophyPage);
         if (window.TeacherPage) app.component('TeacherPage', window.TeacherPage);
         if (window.TrialBooking) app.component('TrialBooking', window.TrialBooking);
+        if (window.ChangePasswordPage) app.component('ChangePasswordPage', window.ChangePasswordPage);
+        if (window.AdminStudentsPage) app.component('AdminStudentsPage', window.AdminStudentsPage);
         
         app.mount('#app');
         console.log('小小达芬奇艺术教育平台已启动');

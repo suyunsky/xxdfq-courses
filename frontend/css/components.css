@@ -160,6 +160,8 @@
 .site-footer__contact { font-size:.8rem; color:var(--ink-soft); }
 .site-footer__contact p + p { margin-top:10px; }
 .site-footer__bottom { padding:22px 0 30px; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:25px; color:var(--ink-faint); font-size:.7rem; }
+.site-footer__filing { color:inherit; white-space:nowrap; transition:color 180ms ease; }
+.site-footer__filing:hover,.site-footer__filing:focus-visible { color:var(--blue); }
 
 /* Dashboard trial leads */
 .lead-admin { margin-top:30px; border-top:1px solid var(--line); overflow-x:auto; }

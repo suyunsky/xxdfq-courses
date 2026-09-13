@@ -230,8 +230,13 @@ window.LoginPage = {
                         window.app.config.globalProperties.$user = result.user;
                     }
                     
-                    // 跳转到用户中心
-                    this.$emit('navigate', '/dashboard');
+                    if (result.user.must_change_password) {
+                        this.$emit('navigate', '/change-password');
+                    } else if (result.user.role === 'admin') {
+                        this.$emit('navigate', '/admin/students');
+                    } else {
+                        this.$emit('navigate', '/dashboard');
+                    }
                 } else {
                     throw new Error(result.message || '登录失败');
                 }

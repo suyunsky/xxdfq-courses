@@ -3,13 +3,15 @@ Web会话依赖注入
 """
 
 from fastapi import Depends, HTTPException, status, Request
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from typing import Dict, Any, Optional
 
 from session_manager import WebSessionManager
 from cookie_utils import CookieManager
 from models import get_db, User
-from auth import get_current_user_optional
+from auth import get_current_user_optional, security
+import os
 
 
 # 初始化管理器
@@ -21,7 +23,8 @@ def get_session_manager(db: Session = Depends(get_db)):
 
 def get_cookie_manager():
     """获取Cookie管理器"""
-    return CookieManager()
+    environment = os.getenv("ENVIRONMENT", "development").lower()
+    return CookieManager(secure=environment not in {"development", "dev", "test"})
 
 
 # Web会话依赖
@@ -135,7 +138,8 @@ async def get_current_user_hybrid(
     request: Request,
     db: Session = Depends(get_db),
     session_manager: WebSessionManager = Depends(get_session_manager),
-    cookie_manager: CookieManager = Depends(get_cookie_manager)
+    cookie_manager: CookieManager = Depends(get_cookie_manager),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> Optional[User]:
     """
     混合认证：优先使用Web Session，其次使用JWT
@@ -153,9 +157,8 @@ async def get_current_user_hybrid(
                 return user
     
     # 2. 尝试从JWT获取用户
-    from auth import get_current_user_optional
     try:
-        user = await get_current_user_optional(request=request, db=db)
+        user = await get_current_user_optional(credentials=credentials, db=db)
         if user:
             return user
     except:

@@ -19,6 +19,7 @@ window.Footer = {
             </div>
             <div class="site-shell site-footer__bottom">
                 <span>© {{ year }} 小小达芬奇儿童艺术教育</span>
+                <a class="site-footer__filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">京ICP备2026009964号-1</a>
                 <span>艺术打开表达，也陪孩子慢慢长大</span>
             </div>
         </footer>
