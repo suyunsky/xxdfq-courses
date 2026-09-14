@@ -4,6 +4,27 @@
 // 使用相对路径，让Nginx代理到后端服务
 window.apiBaseUrl = window.location.port === '8080' ? 'http://localhost:8000' : '';
 
+// 当前设备的统一退出逻辑，供导航栏和学员中心复用。
+window.xxdfqAuth = {
+    setCurrentUser(user) {
+        window.dispatchEvent(new CustomEvent('xxdfq-auth-changed', {
+            detail: { user: user || null }
+        }));
+    },
+    async logout() {
+        const response = await fetch((window.apiBaseUrl || '') + '/api/auth/web/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        // 401 表示会话已经失效，退出目标同样已经达成。
+        if (!response.ok && response.status !== 401) {
+            throw new Error('退出失败，请重试。');
+        }
+        this.setCurrentUser(null);
+        return true;
+    }
+};
+
 console.log('API基础URL配置:', window.apiBaseUrl);
 console.log('当前部署模式: Nginx代理模式');
 

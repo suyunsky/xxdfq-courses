@@ -224,6 +224,7 @@ window.LoginPage = {
                 
                 if (result.success) {
                     console.log('Web会话登录成功:', result.user.username);
+                    window.xxdfqAuth.setCurrentUser(result.user);
                     
                     // 存储用户信息到全局状态（如果需要）
                     if (window.app && window.app.config && window.app.config.globalProperties) {

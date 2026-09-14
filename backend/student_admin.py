@@ -180,6 +180,80 @@ def serialize_transaction(tx: LessonHourTransaction, reversed_ids: set[int] | No
     }
 
 
+@router.get("/api/student/dashboard")
+def get_student_dashboard(
+    db: DBSession = Depends(get_db),
+    current_user: User = Depends(require_current_user_hybrid),
+):
+    """返回当前登录用户自己的学员档案和课时数据。"""
+    response = {
+        "user": {
+            "id": current_user.id,
+            "username": current_user.username,
+            "full_name": current_user.full_name,
+            "email": current_user.email,
+            "role": current_user.role,
+            "must_change_password": current_user.must_change_password,
+        },
+        "profile": None,
+        "lesson_hours": None,
+    }
+
+    profile = db.query(StudentProfile).options(
+        joinedload(StudentProfile.hour_account)
+    ).filter(StudentProfile.user_id == current_user.id).first()
+    if not profile:
+        return response
+
+    response["profile"] = {
+        "birth_date": profile.birth_date.isoformat(),
+        "age": calculate_age(profile.birth_date),
+        "status": profile.status,
+        "guardian_phone_masked": mask_phone(profile.guardian_phone),
+    }
+
+    account = profile.hour_account
+    if not account:
+        return response
+
+    transactions = db.query(LessonHourTransaction).options(
+        joinedload(LessonHourTransaction.operator)
+    ).filter(
+        LessonHourTransaction.account_id == account.id
+    ).order_by(
+        LessonHourTransaction.occurred_on.desc(),
+        LessonHourTransaction.created_at.desc(),
+        LessonHourTransaction.id.desc(),
+    ).limit(10).all()
+    transaction_ids = [transaction.id for transaction in transactions]
+    reversed_ids = {
+        row[0] for row in db.query(LessonHourTransaction.reversal_of_id).filter(
+            LessonHourTransaction.account_id == account.id,
+            LessonHourTransaction.reversal_of_id.in_(transaction_ids),
+        ).all() if row[0] is not None
+    } if transaction_ids else set()
+
+    response["lesson_hours"] = {
+        "balance": account.balance,
+        "recent_transactions": [
+            {
+                "id": transaction.id,
+                "transaction_type": transaction.transaction_type,
+                "quantity_delta": transaction.quantity_delta,
+                "balance_after": transaction.balance_after,
+                "occurred_on": transaction.occurred_on.isoformat(),
+                "reason": transaction.reason,
+                "operator": (
+                    transaction.operator.full_name or transaction.operator.username
+                ) if transaction.operator else "管理员",
+                "is_reversed": transaction.id in reversed_ids,
+            }
+            for transaction in transactions
+        ],
+    }
+    return response
+
+
 @router.get("/api/admin/students")
 def list_students(
     query: Optional[str] = None,
