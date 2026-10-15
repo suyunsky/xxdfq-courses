@@ -163,8 +163,11 @@
 .site-footer__contact { font-size:.8rem; color:var(--ink-soft); }
 .site-footer__contact p + p { margin-top:10px; }
 .site-footer__bottom { padding:22px 0 30px; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:25px; color:var(--ink-faint); font-size:.7rem; }
+.site-footer__filings { display:flex; align-items:center; justify-content:center; gap:10px 20px; flex-wrap:wrap; }
 .site-footer__filing { color:inherit; white-space:nowrap; transition:color 180ms ease; }
 .site-footer__filing:hover,.site-footer__filing:focus-visible { color:var(--blue); }
+.site-footer__filing--police { display:inline-flex; align-items:center; gap:5px; }
+.site-footer__filing--police img { width:14px; height:15px; object-fit:contain; flex:0 0 auto; }
 
 /* Student dashboard */
 .student-dashboard__hero { padding:clamp(76px,9vw,132px) 0 clamp(54px,7vw,96px); border-bottom:1px solid var(--line); }
@@ -316,6 +319,7 @@
     .site-footer__main { grid-template-columns:1fr; gap:44px; }
     .site-footer__brand { grid-column:auto; }
     .site-footer__bottom { flex-direction:column; }
+    .site-footer__filings { justify-content:flex-start; align-items:flex-start; flex-direction:column; }
     .student-dashboard__hero { padding:56px 0 48px; }
     .student-dashboard__heading { display:block; margin-top:20px; }
     .student-dashboard__heading h1 { font-size:3.2rem; }

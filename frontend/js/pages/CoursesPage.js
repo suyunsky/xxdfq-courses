@@ -13,7 +13,7 @@ window.CoursesPage = {
                     <dl><div><dt>适合</dt><dd>已有创作经验，希望继续深入探索的孩子</dd></div><div><dt>过程</dt><dd>艺术创作与阶段性回顾相互配合</dd></div><div><dt>重点</dt><dd>看见自己的思考路径，积累调整经验</dd></div></dl>
                 </article>
             </div></section>
-            <section class="section"><div class="site-shell course-catalog">
+            <section v-if="showOnlineCourses" class="section"><div class="site-shell course-catalog">
                 <div class="course-catalog__header"><div><span class="section-number">ONLINE</span><h2 class="section-title">在线课程</h2></div><p>为已报名学员提供课程回看与延伸内容。</p></div>
                 <div class="course-filters" aria-label="课程筛选">
                     <button v-for="filter in ageFilters" :key="filter.value" class="filter-button" :class="{ 'is-active': activeAge === filter.value }" @click="activeAge = filter.value">{{ filter.label }}</button>
@@ -33,9 +33,9 @@ window.CoursesPage = {
             <section class="section section--quiet"><div class="site-shell experience-cta"><div><span class="section-number">适合 6–12 岁｜回龙观龙泽东附近</span><h2>先从一次真实的艺术体验开始</h2><p>在选择课程前，先让孩子走进课堂，感受材料、创作和表达。</p><button class="brand-button brand-button--primary" @click="openBooking">预约艺术体验</button></div></div></section>
         </div>
     `,
-    data() { return { activeAge: 'all', courses: [], isLoading: true, error: '', ageFilters: [{label:'全部课程',value:'all'},{label:'5–7 岁',value:'5-7'},{label:'8–10 岁',value:'8-10'},{label:'11–13 岁',value:'11-13'}] }; },
+    data() { return { showOnlineCourses: false, activeAge: 'all', courses: [], isLoading: false, error: '', ageFilters: [{label:'全部课程',value:'all'},{label:'5–7 岁',value:'5-7'},{label:'8–10 岁',value:'8-10'},{label:'11–13 岁',value:'11-13'}] }; },
     computed: { filteredCourses() { return this.activeAge === 'all' ? this.courses : this.courses.filter(c => c.age_range === this.activeAge); } },
-    mounted() { this.loadCourses(); },
+    mounted() { if (this.showOnlineCourses) this.loadCourses(); },
     methods: {
         async loadCourses() { this.isLoading=true; this.error=''; try { const r=await fetch((window.apiBaseUrl||'')+'/api/courses',{credentials:'include'}); if(!r.ok) throw new Error('课程加载失败'); this.courses=await r.json(); } catch(e) { this.error=e.message; } finally { this.isLoading=false; } },
         stageLabel(stage) { return {awakening:'感知',expression:'表达',structure:'理解',style:'个人语言'}[stage] || stage || '艺术成长'; },

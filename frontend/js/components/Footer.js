@@ -9,7 +9,7 @@ window.Footer = {
                 <nav class="site-footer__links" aria-label="页脚导航">
                     <a href="/philosophy">教育理念</a><a href="/courses">课程体系</a>
                     <a href="/gallery">成长影像</a><a href="/teacher">毛毛老师</a>
-                    <a href="/login">学习中心</a><button class="text-link" style="border-width:0 0 1px;background:transparent;padding:0;width:max-content;cursor:pointer" @click="openBooking">预约体验</button>
+                    <button class="text-link" style="border-width:0 0 1px;background:transparent;padding:0;width:max-content;cursor:pointer" @click="openBooking">预约体验</button>
                 </nav>
                 <div class="site-footer__contact">
                     <p>北京昌平区</p>
@@ -19,7 +19,13 @@ window.Footer = {
             </div>
             <div class="site-shell site-footer__bottom">
                 <span>© {{ year }} 小小达芬奇儿童艺术教育</span>
-                <a class="site-footer__filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">京ICP备2026009964号-1</a>
+                <div class="site-footer__filings">
+                    <a class="site-footer__filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">京ICP备2026009964号-1</a>
+                    <a class="site-footer__filing site-footer__filing--police" href="https://beian.mps.gov.cn/#/query/webSearch?code=11011402057414" target="_blank" rel="noopener noreferrer">
+                        <img src="/assets/images/gongan-beian.png" alt="" width="14" height="15">
+                        <span>京公网安备11011402057414号</span>
+                    </a>
+                </div>
                 <span>艺术打开表达，也陪孩子慢慢长大</span>
             </div>
         </footer>

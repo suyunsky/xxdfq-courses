@@ -10,7 +10,7 @@ window.NavBar = {
                     <a v-for="item in links" :key="item.path" :href="item.path" class="site-nav__link" :class="{ 'is-active': isActive(item.path) }">{{ item.label }}</a>
                 </nav>
                 <div class="site-nav__actions">
-                    <a :href="learningCenterPath" class="site-nav__learning">{{ learningCenterLabel }}</a>
+                    <a v-if="currentUser" :href="learningCenterPath" class="site-nav__learning">{{ learningCenterLabel }}</a>
                     <button v-if="currentUser" type="button" class="site-nav__logout" :disabled="logoutPending" @click="handleLogout">
                         {{ logoutPending ? '正在退出…' : '退出登录' }}
                     </button>
@@ -22,7 +22,7 @@ window.NavBar = {
             </div>
             <nav class="mobile-menu" :class="{ 'is-open': menuOpen }" aria-label="移动端导航">
                 <a v-for="item in links" :key="item.path" :href="item.path" @click="closeMenu">{{ item.label }}</a>
-                <a :href="learningCenterPath" @click="closeMenu">{{ learningCenterLabel }}</a>
+                <a v-if="currentUser" :href="learningCenterPath" @click="closeMenu">{{ learningCenterLabel }}</a>
                 <button v-if="currentUser" type="button" class="mobile-menu__logout" :disabled="logoutPending" @click="handleLogout">
                     {{ logoutPending ? '正在退出…' : '退出登录' }}
                 </button>
